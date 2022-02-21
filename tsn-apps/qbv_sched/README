@@ -1,0 +1,19 @@
+#SPDX-License-Identifier: GPL-2.0
+Usage:
+ qbv_sched [-s|-g|-c] <interface> [off] [file path] -f
+
+interface : [ep/eth0/eth1/eth2]
+
+file path : location of Qbv schedule."
+"For example: /etc/qbv.cfg
+
+-s : To set QBV schedule
+
+-g : To get operative QBV schedule
+
+-c : To use QBV schedule in the file at mentioned path
+
+-f : force to set QBV schedule
+
+off : to stop QBV schedule
+

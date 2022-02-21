@@ -1,0 +1,10 @@
+#SPDX-License-Identifier: GPL-2.0
+Usage:
+
+/******************************************/
+
+ptptime
+
+Gets the current time as per PTP clock.
+
+/******************************************/

@@ -1,0 +1,35 @@
+#SPDX-License-Identifier: GPL-2.0
+/******************************************/
+
+Usage: switch_cam2 [-edr] <arg1> <arg2> ...
+
+
+Extended CAM entry to add multiple ports actions:
+
+switch_cam2 -e --swp0|swpex0 =[dvtu] --swp1|swp2=[dvtu] -m <dest mac> -v <vlan id> -n <native vlan id> -g <gate id> -c <tv MAC> -t <tv vlan id> -i <ipv> -s <swp0 | swpex0>
+
+For deleting CAM entry :
+
+switch_cam2 -d -m <dest mac> -v <vlan id>
+
+For reading CAM entry :
+
+switch_cam2 -r -m <dest mac> -v <vlan id>
+
+options: can select any combinations of \"dvtu\" or without any option
+
+d: translate dest mac, v: translate vlan id
+
+t: tag vlan id, u: untag vlan id
+
+port: swp0 for endpoint, swp1 for Port1, swp2 for Port2 swpex0 for extended endpoint
+
+ipv : 0 to 7
+
+HELP:
+
+switch_cam2 -h
+
+/******************************************/
+
+

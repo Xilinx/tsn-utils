@@ -1,0 +1,24 @@
+#SPDX-License-Identifier: GPL-2.0
+Usage:
+ qbu_prog <interface> <status> -w <0|1> -g <0|1> -h <hold_time> -r <rel_time>
+
+	OR
+
+Usage:
+ qbu_prog <interface> <status>
+
+interface : [eth1|eth2]
+
+status: Display the Qbu Core status
+
+Optional parameters:
+
+	-w : Hold-Release Window ON/OFF
+
+	-g : Guard Band Overrun Counters increment ON/OFF
+
+	-h : User Hold time in bytes 0 to 511, 0- Disable the User Hold time Override
+
+	-r : User Release time in bytes 0 t0 63, 0- Disable the User Release time Override
+
+

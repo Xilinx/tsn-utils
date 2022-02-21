@@ -1,0 +1,3 @@
+#SPDX-License-Identifier: GPL-2.0
+Usage:
+#ipic_prog <add | del | flush> <src_ip> <dest_ip> <protocol> <dscp> <src_port> <dest_port> <src_mac> <dest_mac> <vlanid> <pcp>

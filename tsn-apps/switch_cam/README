@@ -1,0 +1,49 @@
+#SPDX-License-Identifier: GPL-2.0
+/******************************************/
+
+Usage: switch_cam [-atudr] <arg1> <arg2> ...
+
+
+For adding CAM entry :
+
+switch_cam -a <Dest MAC> <vlan id> <port> [gate id] [tv MAC] [tv vlan id] [ipv]
+
+For adding CAM entry to tag frame:
+
+switch_cam -t <Dest MAC> <native vlan id> <port> <tv vlan id> [gate id]
+
+For adding CAM entry to untag frame:
+
+switch_cam -u <Dest MAC> <vlan id> <port> [gate id]
+
+For deleting CAM entry :
+
+switch_cam -d <Dest MAC> <vlan id>
+
+For reading CAM entry :
+
+switch_cam -r <Dest MAC> <vlan id>
+
+Extended CAM entry to add multiple ports actions:
+
+switch_cam -e <Dest MAC> <vlan id> --swp0=[dvtu] --swp1|swp2=[dvtu] -g <gate id> -m <tv MAC> -v <tv vlan id> -i <ipv>
+
+options: can select any combinations of \"dvtu\" or without any option
+
+d: translate dest mac, v: translate vlan id
+
+t: tag vlan id, u: untag vlan id
+
+port: swp0 for endpoint, swp1 for Port1, swp2 for Port2
+
+ipv : 0 to 7
+
+[] arguments are optional
+
+HELP:
+
+switch_cam -h
+
+/******************************************/
+
+

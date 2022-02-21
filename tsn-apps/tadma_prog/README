@@ -1,0 +1,19 @@
+#SPDX-License-Identifier: GPL-2.0
+Usage-1 :
+ tadma_prog <interface>
+
+        Default configuration of streams is in /etc/streams.cfg
+
+Usage-2 :
+ tadma_prog -c <interface> [file name]
+
+        file name : user defined streams's configuration. Ex: streams_01.cfg
+
+Usage-3 :
+ tadma_prog <interface> off
+
+        Programs TADMA back to continuous mode
+
+interface : [ep/eth0/eth1]
+
+-c : To use the configuration of streams in the file at mentioned path

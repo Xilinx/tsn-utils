@@ -1,0 +1,53 @@
+#SPDX-License-Identifier: GPL-2.0
+/******************************************/
+
+Usage: qci_prog [-sma] <arg1> <arg2> ...
+
+
+For programing streaming filter memory :
+
+qci_prog -s <ingress port> <max frame size> <gate id> <meter en> <stream en> <psfp en>
+
+(meter en, stream en and psfp en are optional here, default value will be 0)
+
+
+For programing meter memory :
+
+qci_prog -m <CIR> <EIR> <CBR> <EBR> <mode> <meter id> <gate id>
+
+
+For both memory in one shot:
+
+qci_prog -a <ingress port> <max frame size> <CIR> <EIR> <CBR>" \
+" <EBR> <mode> <gate id> <meter id> "   \
+"<meter gate state> <filtering gate stream> "   \
+"<psfp valid>
+
+(last 3 options are optional here, default value will be 0)
+
+
+For reading stream filter memory:
+
+qci_prog -r stream <gate id>
+
+
+For reading meter memory:
+
+qci_prog -r meter <meter id>
+
+
+For reading PSFP statistic counters:
+
+qci_prog -r counter <gate id>
+
+
+HELP:
+
+qci_prog -h
+
+
+All values in decimals, except ingress port - swp1 | swp2
+
+/******************************************/
+
+

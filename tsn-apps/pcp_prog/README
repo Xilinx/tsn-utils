@@ -1,0 +1,21 @@
+#SPDX-License-Identifier: GPL-2.0
+/******************************************/
+
+Usage: pcp_prog [-sg]
+
+
+To set new configuration as specified in /etc/pcp.cfg:
+
+pcp_prog -s
+
+For reading current configuration:
+
+pcp_prog -g
+
+HELP:
+
+pcp_prog -h
+
+/******************************************/
+
+

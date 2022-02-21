@@ -1,0 +1,80 @@
+#SPDX-License-Identifier: GPL-2.0
+/******************************************/
+
+
+Usage: switch_prog ale -s --vlanid=<0 to 4095> --learning=<0|1> --aging=<0|1> --time=<aging_time 0 to 1000000secs>
+
+By mentioning vlan_id the HW address learning and aging configuration"
+" applies to the specific vlan_id, otherwise it sets as switch"
+" global configuration
+
+
+Usage: switch_prog ale -s --learning=<0|1> --untag
+
+--untag: set --learning 0 or 1 to learn HW MAC address for untag packets
+
+
+Usage: switch_prog ale -g
+
+Shows the switch global HW address learning configuration
+
+Usage: switch_prog ale -g --vlanid=<0 to 4095>
+
+Shows the specific vlan id's HW address learning configuration
+
+Usage: switch_prog ale -g --list_ent=<swp1 | swp2>
+
+Lists all HW address learnt for specific port
+
+swp1 for TEMAC1, swp2 for TEMAC2
+
+/******************************************/
+
+
+
+Usage: switch_prog pst -s <swp0 | swp1 | swp2 | swpex0> --state=<state 0 to 5>
+
+Usage: switch_prog pst -g <swp0 | swp1 | swp2 | swpex0>
+
+Set/Get the port state
+
+0 - Dsiable/Initialization state
+1 - Blocking state
+"
+"2 - Listening state
+3 - Learning state
+"
+"4 - Forwarding state
+5 - Flush Entries
+
+swp0 for endpoint, swp1 for TEMAC1, swp2 for TEMAC2 swpex0 for extended endpoint
+
+/******************************************/
+
+
+
+Usage: switch_prog vlanm -a <swp0 | swp1 | swp2> --vlanid=<0 to 4095> --ipv=<0 to 7> --vpst=<0 to 5>
+
+Usage: switch_prog vlanm -d <swp0 | swp1 | swp2> --vlanid=<0 to 4095>
+
+Usage: switch_prog vlanm -r --vlanid=<0 to 4095>
+
+Add/Delete/Get port to the specific vlan id
+
+swp0 for endpoint, swp1 for TEMAC1, swp2 for TEMAC2
+
+/******************************************/
+
+
+
+Usage: switch_prog nvl -s <swp0 | swp1 | swp2> --vlanid=<0 to 4095> --ipv=<0 to 7>
+
+Usage: switch_prog nvl -g <swp0 | swp1 | swp2>
+
+HELP:
+
+switch_prog -h
+
+/******************************************/
+
+

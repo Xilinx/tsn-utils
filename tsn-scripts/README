@@ -1,0 +1,73 @@
+SPDX-License-Identifier: GPL-2.0
+
+These scripts are examples of how each of the TSN Clauses can be used.
+
+*** HW SETUP ***
+For ptp, Qbv and TADMA, eth1 on xilinx board should be connected to a PC running
+ptp as master. Run wireshark on the PC in order to observe the network traffic.
+
+For FRER,Qci connect two xilinx boards back to back. eth1(FMC port 0) of board 1 
+should be connected to eth1 of board 2. eth2 of board 1 should be connected to eth2 of 
+board 2
+
+*** Running the scripts ***
+
+For build instructions, Please refer to Software user guide
+
+To bootup, copy the following from <yoctodir>/build/tmp/deploy/images/<board> directory
+to sd card.
+1. boot.scr
+2. BOOT-<board name>.bin- rename this to BOOT.bin
+3. fitImage-core-image-minimal-<board name>-<board name>
+4. uEnv.txt
+
+Insert the sd card into the board and power it on.
+
+The scripts are present in /usr/sbin/ folder of rootfs.
+
+For Qbv and tadma, the scripts need the destination mac address as an argument.
+If the board is connected to PC, to see the mac address, you can use the following
+command on PC to view its mac address.
+ifconfig <interface>
+
+run the script for the clause you want to run
+
+Example 1: sh qbv_auto.sh <dest mac>
+Example 2: sh frer_receive.sh 
+
+For FRER,Qci run <clause>_sender.sh on the sending side, and <clause>_receive.sh on
+the receiving side. Run receive side of FRER/Qci first.
+
+Steps to view packet capture on wireshark in a back to back setup:
+
+To redirect the packet capture to wireshark:
+
+1. Connect eth0 (PS side ethernet port) to a PC capable of running wireshark.
+2. On the board set IP address of eth0
+	ifconfig eth0 <ipaddr> up
+3. Make sure the IP addresses of ep, PC and eth0 are on the subnet.
+4. uncomment the following lines in FRER and Qci receive scripts.
+#brctl addbr brt
+#brctl addif brt eth0
+#brctl addif brt ep
+#ifconfig brt up
+5. Start wireshark capture on the PC to see the log.
+
+Note: Running any oob script kills any instances of
+tsn_talker/ptp4l already running before launching the script.
+
+***Mounting and Unmounting SD card on the board***
+
+SD card will be mounted automatically at bootup.
+To see the mount point, run the following command
+$ mount
+Following lines should be visible on the console
+/dev/mmcblk0p1 on <mount point> type vfat
+
+If the sd card is not mounted, then run the following command to mount it.
+$ mount /dev/mmcblk0p1 <mount directory>
+
+Once its mounted sd card can be accessed like any other directory.
+
+To unmount the sd card run the following command:
+$ umount /dev/mmcblk0p1

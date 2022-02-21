@@ -1,0 +1,10 @@
+#SPDX-License-Identifier: GPL-2.0
+Usage:
+br_prog <interface> <frame_preemption> <verify_timer_value> <additional_frag_size> <disable_preemp_verify>
+interface : [eth1|eth2]
+frame_preemption : [enable|disable|status|stats]
+Optional parameters:
+	verify_timer_value : [0 to 127]
+	additional_frag_size : [64|128|192|256]
+	disable_preemp_verify : [1|0]
+

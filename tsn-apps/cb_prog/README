@@ -1,0 +1,52 @@
+#SPDX-License-Identifier: GPL-2.0
+
+/******************************************/
+
+Usage: cb_prog [-ima] <arg1> <arg2> ...
+
+
+For programing ingress filter memory :
+
+cb_prog -i <ingress port> <seq rec history len> <gate id> <member id> <remaining ticks> <seq reset> <recv timout valid> <gate state> <frer valid>
+
+(last 5 args are optional here, default value will be 1)
+
+
+For programing member memory :
+
+cb_prog -m <max seq id> <EgressPort> <VLAN ID> <gate id> <member id> <gate state> <frer valid>
+
+
+(last 2 args are optional here, default value will be 1)
+
+
+For both memory in one shot:
+
+cb_prog -a <ingress port> <max seq id> <seq rec history len> <EgressPort> <VLAN ID> <Remaining Ticks> <gate id> <member id> <seq reset> <recv timout valid> <gate state> <frer valid>
+
+(last 4 args are optional here, default value will be 0)
+
+
+For reading ingress filter memory:
+
+cb_prog -r ingress <gate id>
+
+
+For reading member memory:
+
+cb_prog -r member <member id>
+
+
+For reading FRER statistic counters:
+
+cb_prog -r counter <gate id>
+
+
+HELP:
+
+cb_prog -h
+
+
+All values in decimals, except ingress/egress port - swp1 | swp2
+
+/******************************************/

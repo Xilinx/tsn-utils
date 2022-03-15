@@ -1,6 +1,6 @@
-#
-#SPDX-License-Identifier: GPL-2.0
-#
+#Copyright (c) 2020-2022 Xilinx, Inc. All rights reserved.
+#SPDX-License-Identifier: MIT
+
 #!/bin/bash
 #interface bringup
 source /usr/sbin/OOB_scripts/common.sh

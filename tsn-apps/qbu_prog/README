@@ -1,5 +1,5 @@
-#SPDX-License-Identifier: GPL-2.0
-Usage:
+#Copyright (c) 2016-2022 Xilinx, Inc. All rights reserved.
+#SPDX-License-Identifier: MIT
  qbu_prog <interface> <status> -w <0|1> -g <0|1> -h <hold_time> -r <rel_time>
 
 	OR

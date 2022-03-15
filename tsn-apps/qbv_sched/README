@@ -1,5 +1,5 @@
-#SPDX-License-Identifier: GPL-2.0
-Usage:
+#Copyright (c) 2016-2022 Xilinx, Inc. All rights reserved.
+#SPDX-License-Identifier: MIT
  qbv_sched [-s|-g|-c] <interface> [off] [file path] -f
 
 interface : [ep/eth0/eth1/eth2]

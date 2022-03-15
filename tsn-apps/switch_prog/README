@@ -1,5 +1,5 @@
-#SPDX-License-Identifier: GPL-2.0
-/******************************************/
+#Copyright (c) 2016-2022 Xilinx, Inc. All rights reserved.
+#SPDX-License-Identifier: MIT
 
 
 Usage: switch_prog ale -s --vlanid=<0 to 4095> --learning=<0|1> --aging=<0|1> --time=<aging_time 0 to 1000000secs>

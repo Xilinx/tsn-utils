@@ -1,6 +1,6 @@
-#
-#SPDX-License-Identifier: GPL-2.0
-#
+#Copyright (c) 2020-2022 Xilinx, Inc. All rights reserved.
+#SPDX-License-Identifier: MIT
+
 dt_dir=/proc/device-tree/
 switch_dir=`find $dt_dir -iname tsn_switch*`
 if [ "$switch_dir" == "" ]; then

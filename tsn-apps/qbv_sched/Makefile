@@ -8,7 +8,7 @@ APP_OBJS = qbv_sched.o
 all: $(APP)
 
 $(APP): $(APP_OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(APP_OBJS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(APP_OBJS) $(LDLIBS) -lconfig
 
 clean:
 	-rm -f $(APP) *.elf *.gdb *.o

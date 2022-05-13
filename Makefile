@@ -32,6 +32,7 @@ install:
 	$(MAKE) -C tsn-apps/switch_cam2 install
 	$(MAKE) -C tsn-apps/switch_prog install
 	$(MAKE) -C tsn-apps/tadma_prog install
+	$(MAKE) -C tsn-conf install
 
 .PHONY: clean
 clean:

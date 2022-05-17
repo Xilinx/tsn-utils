@@ -2,7 +2,7 @@
 #SPDX-License-Identifier: MIT
 
 #!/bin/bash
-source /usr/sbin/OOB_scripts/common.sh
+source /usr/bin/OOB_scripts/common.sh
 read srcmac < /sys/class/net/ep/address
 [ "$1" == "" ] && echo "specify a destination mac address" && exit
 destmac=$1

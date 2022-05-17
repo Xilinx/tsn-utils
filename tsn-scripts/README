@@ -23,7 +23,7 @@ to sd card.
 
 Insert the sd card into the board and power it on.
 
-The scripts are present in /usr/sbin/ folder of rootfs.
+The scripts are present in /usr/bin/ folder of rootfs.
 
 For Qbv and tadma, the scripts need the destination mac address as an argument.
 If the board is connected to PC, to see the mac address, you can use the following

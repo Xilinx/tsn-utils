@@ -2,7 +2,7 @@
 #SPDX-License-Identifier: MIT
 
 #!/bin/bash
-source /usr/sbin/OOB_scripts/common.sh
+source /usr/bin/OOB_scripts/common.sh
 [ "$1" == "" ] && echo "specify a destination mac address" && exit
 init_ptp
 destmac=$1

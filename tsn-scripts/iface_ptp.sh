@@ -3,7 +3,7 @@
 
 #!/bin/bash
 #interface bringup
-source /usr/sbin/OOB_scripts/common.sh
+source /usr/bin/OOB_scripts/common.sh
 ifconfig ep 192.168.1.99 up
 ifconfig eth1 up
 sleep 5
@@ -26,4 +26,4 @@ fi
 done
 fi
 #PTP
-ptp4l -P -2 -H -i eth1 -p /dev/ptp0 -s -m -f /usr/sbin/ptp4l_slave.conf
+ptp4l -P -2 -H -i eth1 -p /dev/ptp0 -s -m -f /usr/bin/ptp4l_slave.conf

@@ -2,7 +2,7 @@
 #SPDX-License-Identifier: MIT
 
 #!/bin/bash
-source /usr/sbin/OOB_scripts/common.sh
+source /usr/bin/OOB_scripts/common.sh
 if [ $switch_present == 0 ]; then
 echo "FRER is not supported for ep only design"
 exit

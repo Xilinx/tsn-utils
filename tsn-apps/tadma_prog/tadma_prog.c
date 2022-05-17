@@ -131,15 +131,7 @@ int sortbytrigger(const void *i1, const void *i2)  {
     struct tadma_stream **b = (struct tadma_stream **)i2;
     return ((*a)->trigger - (*b)->trigger);
 }
-int get_interface(char *argv)
-{	
-        if (!strcmp(argv, "eth1"))
-                return 1;
-        else if (!strcmp(argv, "ep"))
-                return 0;
-        else
-		return -1;
-}
+
 void usage()
 {
 	printf("Usage-1 :\n tadma_prog <interface>\n");
@@ -148,7 +140,6 @@ void usage()
 	printf("	file name : user defined streams's configuration. Ex: streams_01.cfg\n");
 	printf("Usage-3 :\n tadma_prog <interface> off\n");
 	printf("	Programs TADMA back to continuous mode\n");
-	printf("interface : [ep/eth0/eth1]\n");
 	printf("-c : To use the configuration of streams in the file at mentioned path\n");
 	exit(1);
 }
@@ -172,13 +163,9 @@ int main(int argc, char **argv)
 		len = strlen(argv[3]);
 		path = (char*)malloc((len+1)*sizeof(char));
 		strcpy(path,argv[3]);
-		if (get_interface(argv[2]) < 0)
-			usage();	
 		strncpy(ifname, argv[2], IFNAMSIZ);
 
 	} else if (argc ==3 && (strcmp(argv[2], "off") == 0)) {
-		if (get_interface(argv[1]) < 0)
-			usage();	
 		strncpy(ifname, argv[1], IFNAMSIZ);
 		flush_stream(ifname);
 		change_to_continuous(ifname);
@@ -189,8 +176,6 @@ int main(int argc, char **argv)
 		len = strlen("/etc/streams.cfg");
 		path = (char*)malloc((len+1)*sizeof(char));
 		strcpy(path,"/etc/streams.cfg");
-		if (get_interface(argv[1]) < 0)
-			usage();	
 		strncpy(ifname, argv[1], IFNAMSIZ);
 	}
 	if( !config_read_file(&cfg, path) )

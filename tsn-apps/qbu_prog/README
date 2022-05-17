@@ -7,8 +7,6 @@
 Usage:
  qbu_prog <interface> <status>
 
-interface : [eth1|eth2]
-
 status: Display the Qbu Core status
 
 Optional parameters:

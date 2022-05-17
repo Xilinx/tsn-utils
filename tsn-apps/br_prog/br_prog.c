@@ -227,7 +227,7 @@ void preemp_status(struct preempt_status *sts)
 void usage()
 {
 	printf("Usage:\n br_prog <interface> <frame_preemption> <verify_timer_value> <additional_frag_size> <disable_preemp_verify>\n");
-	printf("interface : [eth1|eth2]\n");
+	printf("tsn interface name\n");
 	printf("frame_preemption : [enable|disable|status|stats]\n");
 	printf("Optional parameters:\n");
 	printf("\tverify_timer_value : [0 to 127]\n");
@@ -253,10 +253,6 @@ int main(int argc, char **argv)
 
 	strncpy(ifname, argv[1], IFNAMSIZ);
 
-	if ((strcmp(argv[1], "eth1")) && (strcmp(argv[1], "eth2"))) {
-		usage();
-		return -1;
-	}
 	fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
 	strcpy(s.ifr_name, ifname);
 	

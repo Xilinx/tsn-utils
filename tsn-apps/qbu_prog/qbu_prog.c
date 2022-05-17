@@ -80,7 +80,6 @@ void usage()
 	printf("Usage:\n qbu_prog <interface> <status> -w <0|1> -g <0|1> -h <hold_time> -r <rel_time>\n");
 	printf("\tOR\n");
 	printf("Usage:\n qbu_prog <interface> <status>\n");
-	printf("interface : [eth1|eth2]\n");
 	printf("status: Display the Qbu Core status\n");
 	printf("Optional parameters:\n");
 	printf("\t-w : Hold-Release Window ON/OFF\n");
@@ -105,10 +104,6 @@ int main(int argc, char **argv)
 	}
 
 	strncpy(ifname, argv[1], IFNAMSIZ);
-	if ((strcmp(argv[1], "eth1")) && (strcmp(argv[1], "eth2"))) {
-		usage();
-		return -1;
-	}
 	fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
 	strcpy(s.ifr_name, ifname);
 	

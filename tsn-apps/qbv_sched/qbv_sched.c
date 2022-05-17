@@ -11,6 +11,7 @@
 #include <syscall.h>
 #include <string.h>
 #include <fcntl.h>
+#include <linux/ethtool.h>
 #include <sys/ioctl.h>
 #include <libconfig.h>
 #include <errno.h>
@@ -24,6 +25,8 @@ typedef  unsigned char uint8_t;
 
 #define MAX_CYCLE_TIME	1000000000
 #define MAX_ENTRIES	256
+
+#define SIOCETHTOOL     0x8946
 
 enum axienet_tsn_ioctl {
         SIOCCHIOCTL = SIOCDEVPRIVATE,
@@ -68,17 +71,51 @@ static clockid_t get_clockid(int fd)
 int set_schedule(struct qbv_info *prog, char *ifname)
 {
 	struct ifreq s;
+	struct ethtool_ts_info info;
+	struct ifreq ethtool_ifr;
 	int ret;
+	int phc_fd;
+	char phc[32];
+	clockid_t clkid;
+	struct timespec tmx;
 
 	if(!ifname)
-		return;
+		return -1;
 
 	int fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
+	if(prog->ptp_time_ns == 0 && prog->ptp_time_sec == 0){
+		memset(&ethtool_ifr, 0, sizeof(ethtool_ifr));
+		memset(&info, 0, sizeof(info));
+		info.cmd = ETHTOOL_GET_TS_INFO;
+		strncpy(ethtool_ifr.ifr_name, ifname, IFNAMSIZ - 1);
+		ethtool_ifr.ifr_data = (char *) &info;
+		ret = ioctl(fd, SIOCETHTOOL, &ethtool_ifr);
+		if (ret < 0) {
+			printf("ioctl SIOCETHTOOL failed: %m");
+			close(fd);
+			return -1;
+		}
+		if (info.phc_index >= 0) {
+			printf("selected /dev/ptp%d as PTP clock\n", info.phc_index);
+			snprintf(phc, sizeof(phc), "/dev/ptp%d", info.phc_index);
+		}
+		else {
+			printf("phc index: %d\n",info.phc_index);
+		}
+		phc_fd = open(phc, O_RDWR);
+		if (phc_fd < 0)
+			return -1;
+
+		clkid = get_clockid(phc_fd);
+		clock_gettime(clkid, &tmx);
+                prog->ptp_time_ns = 0;
+                prog->ptp_time_sec = tmx.tv_sec + 1;
+		close(phc_fd);
+	}
 
 	s.ifr_data = (void *)prog;
 
-	strcpy(s.ifr_name, ifname);
-
+	strncpy(s.ifr_name, ifname,sizeof(s.ifr_name)-1);
 	ret = ioctl(fd, SIOCDEVPRIVATE, &s);
 
 	if(ret < 0)
@@ -92,10 +129,9 @@ int set_schedule(struct qbv_info *prog, char *ifname)
 
 	}
 	close(fd);
-
 }
 
-void get_schedule(unsigned char port, char *ifname)
+void get_schedule(char *ifname)
 {
 	struct qbv_info qbv;
 	struct ifreq s;
@@ -104,7 +140,6 @@ void get_schedule(unsigned char port, char *ifname)
 	if(!ifname)
 		return;
 
-	qbv.port = port;
 	fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
 
 	s.ifr_data = (void *)&qbv;
@@ -138,22 +173,10 @@ void get_schedule(unsigned char port, char *ifname)
 	return;
 }
 
-int get_interface(char *argv)
-{	
-        if ((!strcmp(argv, "eth1")))
-                return 1;
-        else if (!strcmp(argv, "eth2"))
-                return 2;
-        else if (!strcmp(argv, "ep"))
-                return 0;
-        else
-		return -1;
-}
-
 void usage()
 {
 	printf("Usage:\n qbv_sched [-s|-g|-c] <interface> [off] [file path] -f\n");
-	printf("interface : [ep/eth0/eth1/eth2]\n");
+	printf("interface : tsn interface name\n");
 	printf("file path : location of Qbv schedule."
 		"For example: /etc/qbv.cfg\n");
 	printf("-s : To set QBV schedule\n");
@@ -167,8 +190,7 @@ void usage()
 int main(int argc, char **argv)
 {
 	struct qbv_info prog;
-	clockid_t clkid;
-	int phc_fd, i, j;
+	int i, j;
 	char *port;
 	char ifname[IFNAMSIZ];
 
@@ -180,9 +202,6 @@ int main(int argc, char **argv)
 	char file_path = 0, off = 0;
 	char *path = NULL;
 
-	struct timespec tmx;
-
-
 	if((argc < 2) || (argc > 5)) 
 		usage();
 	if(argc >= 4) {
@@ -190,53 +209,28 @@ int main(int argc, char **argv)
 		path = (char*)malloc((len+1)*sizeof(char));
 		strcpy(path,argv[3]);
 	}
-	phc_fd = open( "/dev/ptp0", O_RDWR );
-	if(phc_fd < 0)
-		printf("/dev/ptp0 open failed\n");
-
-	clkid = get_clockid(phc_fd);
 	prog.force = 0;
 	
-	i = get_interface(argv[1]);
-
-	if (i >= 0){
-		strncpy(ifname, argv[1], IFNAMSIZ);
-		if(argc == 3 && (strcmp(argv[2],"off") == 0)) {
-			off = 1;
-			prog.cycle_time = 0;
-		}
-		set_qbv = 1;
-		goto set;	
-	}
-	else {
-		if(argc == 2)
-			usage();
+	strncpy(ifname, argv[1], IFNAMSIZ);
+	set_qbv=1;
+	if(argc == 3 && (strcmp(argv[2],"off") == 0)) {
+		off = 1;
+		prog.cycle_time = 0;
 	}
 
 	while ((ch = getopt (argc, argv, "s:g:c:f")) != -1) {
                 switch (ch)
                 {
                         case 'g':
-				if ((i = get_interface(optarg)) < 0) {
-					close(phc_fd);
-					usage();
-				}
 				strncpy(ifname, optarg, IFNAMSIZ);
-				get_schedule(PORT_EP + i, ifname);
+				set_qbv = 0;
+				get_schedule(ifname);
 				goto out;
                         case 's':
-				if ((i = get_interface(optarg)) < 0) {
-					close(phc_fd);
-					usage();
-				}
 				strncpy(ifname, optarg, IFNAMSIZ);
 				set_qbv = 1;
 				break;
 			case 'c':
-				if ((i = get_interface(optarg)) < 0) {
-					close(phc_fd);
-					usage();
-				}
 				strncpy(ifname, optarg, IFNAMSIZ);
 				set_qbv = 1;
 				file_path = 1;
@@ -245,7 +239,7 @@ int main(int argc, char **argv)
 				prog.force = 1;
 				break;
 			default:
-				goto out;
+				goto set;
 		}
 	}
 set:
@@ -268,14 +262,16 @@ set:
 	}
 
 	if (set_qbv) {
-		port = port_names[i]; 
 		if(off == 0) {
-			sprintf(str, "qbv.%s.cycle_time", port);
+			sprintf(str, "qbv.%s.cycle_time", ifname);
 			setting = config_lookup(&cfg, str);
-
+			if(!setting){
+				printf("qbv.%s.cycle_time not found, please check your configuration\n", ifname);
+				goto out;
+			}
 			prog.cycle_time = config_setting_get_int(setting);
 		}
-		printf("Setting: %s :\n", port);
+		printf("Setting: %s :\n", ifname);
 
 		printf("cycle_time: %d\n", prog.cycle_time);
 
@@ -290,24 +286,15 @@ set:
 
 		prog.cycle_time = prog.cycle_time;
 
-		prog.port = PORT_EP + i;
-
-		sprintf(str, "qbv.%s.start_sec", port);
+		sprintf(str, "qbv.%s.start_sec", ifname);
 		setting = config_lookup(&cfg, str);
 		prog.ptp_time_sec = config_setting_get_int(setting);
 
-		sprintf(str, "qbv.%s.start_ns", port);
+		sprintf(str, "qbv.%s.start_ns", ifname);
 		setting = config_lookup(&cfg, str);
 		prog.ptp_time_ns = config_setting_get_int(setting);
 
-		if(prog.ptp_time_ns == 0 && prog.ptp_time_sec == 0)
-		{
-			clock_gettime(clkid, &tmx);
-			prog.ptp_time_ns = 0;
-			prog.ptp_time_sec = tmx.tv_sec + 1;
-		}
-
-		sprintf(str, "qbv.%s.gate_list", port);
+		sprintf(str, "qbv.%s.gate_list", ifname);
 
 		setting = config_lookup(&cfg, str);
 		if(setting != NULL)
@@ -346,6 +333,5 @@ set:
 	}
 out:
 	free(path);
-	close(phc_fd);
 }
 	

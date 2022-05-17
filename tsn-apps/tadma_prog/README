@@ -14,6 +14,4 @@ Usage-3 :
 
         Programs TADMA back to continuous mode
 
-interface : [ep/eth0/eth1]
-
 -c : To use the configuration of streams in the file at mentioned path

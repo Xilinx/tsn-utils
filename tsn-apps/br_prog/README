@@ -1,7 +1,6 @@
 #Copyright (c) 2016-2022 Xilinx, Inc. All rights reserved.
 #SPDX-License-Identifier: MIT
 br_prog <interface> <frame_preemption> <verify_timer_value> <additional_frag_size> <disable_preemp_verify>
-interface : [eth1|eth2]
 frame_preemption : [enable|disable|status|stats]
 Optional parameters:
 	verify_timer_value : [0 to 127]

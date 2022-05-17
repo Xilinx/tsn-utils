@@ -2,8 +2,6 @@
 #SPDX-License-Identifier: MIT
  qbv_sched [-s|-g|-c] <interface> [off] [file path] -f
 
-interface : [ep/eth0/eth1/eth2]
-
 file path : location of Qbv schedule."
 "For example: /etc/qbv.cfg
 

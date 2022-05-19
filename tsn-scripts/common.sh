@@ -30,14 +30,14 @@ if [ $send -eq 1 ]; then
 	epmac=00:0a:35:00:01:10
 	eth1mac=00:0a:35:00:01:1e
 	eth2mac=00:0a:35:00:01:1f
-	conffile="-s -m -f /usr/sbin/ptp4l_slave.conf"
+	conffile="-s -m -f /usr/bin/ptp4l_slave.conf"
 	successstring=rms
 	ip=192.168.1.99
 else
 	epmac=00:0a:35:00:01:20
 	eth1mac=00:0a:35:00:01:2e
 	eth2mac=00:0a:35:00:01:2f
-	conffile="-m -f /usr/sbin/ptp4l_master.conf"
+	conffile="-m -f /usr/bin/ptp4l_master.conf"
 	successstring="grand master"
 	ip=192.168.1.100
 fi

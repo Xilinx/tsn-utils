@@ -17,6 +17,23 @@ all:
 	$(MAKE) -C tsn-apps/switch_prog all
 	$(MAKE) -C tsn-apps/tadma_prog all
 
+.PHONY: install
+install:
+	$(MAKE) -C tsn-apps/br_prog install
+	$(MAKE) -C tsn-apps/cb_prog install
+	$(MAKE) -C tsn-apps/ipic_prog install
+	$(MAKE) -C tsn-apps/pcp_prog install
+	$(MAKE) -C tsn-apps/ptptime install
+	$(MAKE) -C tsn-apps/ptptime_date install
+	$(MAKE) -C tsn-apps/qbu_prog install
+	$(MAKE) -C tsn-apps/qbv_sched install
+	$(MAKE) -C tsn-apps/qci_prog install
+	$(MAKE) -C tsn-apps/switch_cam install
+	$(MAKE) -C tsn-apps/switch_cam2 install
+	$(MAKE) -C tsn-apps/switch_prog install
+	$(MAKE) -C tsn-apps/tadma_prog install
+	$(MAKE) -C tsn-conf install
+
 .PHONY: clean
 clean:
 	$(MAKE) -C tsn-apps/br_prog clean

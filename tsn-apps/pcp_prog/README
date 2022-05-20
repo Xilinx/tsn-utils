@@ -4,7 +4,7 @@
 Usage: pcp_prog [-sg]
 
 
-To set new configuration as specified in /etc/pcp.cfg:
+To set new configuration as specified in /etc/xilinx-tsn/pcp.cfg:
 
 pcp_prog -s
 

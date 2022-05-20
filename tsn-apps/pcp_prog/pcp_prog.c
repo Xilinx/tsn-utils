@@ -21,7 +21,7 @@ struct pmap_data {
 };
 char *st_pcp_fname = "/sys/module/xilinx_tsn_ep/parameters/st_pcp";
 char *res_pcp_fname = "/sys/module/xilinx_tsn_ep/parameters/res_pcp";
-char *config_fname = "/etc/pcp.cfg";
+char *config_fname = "/etc/xilinx-tsn/pcp.cfg";
 int set_pcp(int argc, char *argv[]);
 int get_pcp();
 void usage();
@@ -147,7 +147,7 @@ int get_pcp(){
 void usage(){
 	printf("/******************************************/\n");
         printf("Usage: pcp_prog [-sg]\n\n");
-        printf("To set new configuration as specified in /etc/pcp.cfg:\n");
+        printf("To set new configuration as specified in /etc/xilinx-tsn/pcp.cfg:\n");
         printf("pcp_prog -s\n");
         printf("For reading current configuration:\n");
         printf("pcp_prog -g\n");

@@ -3,7 +3,7 @@
  qbv_sched [-s|-g|-c] <interface> [off] [file path] -f
 
 file path : location of Qbv schedule."
-"For example: /etc/qbv.cfg
+"For example: /etc/xilinx-tsn/qbv.cfg
 
 -s : To set QBV schedule
 

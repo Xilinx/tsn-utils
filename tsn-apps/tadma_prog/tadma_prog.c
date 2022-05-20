@@ -135,7 +135,7 @@ int sortbytrigger(const void *i1, const void *i2)  {
 void usage()
 {
 	printf("Usage-1 :\n tadma_prog <interface>\n");
-	printf("	Default configuration of streams is in /etc/streams.cfg\n");
+	printf("	Default configuration of streams is in /etc/xilinx-tsn/streams.cfg\n");
 	printf("Usage-2 :\n tadma_prog -c <interface> [file name]\n");
 	printf("	file name : user defined streams's configuration. Ex: streams_01.cfg\n");
 	printf("Usage-3 :\n tadma_prog <interface> off\n");
@@ -173,9 +173,9 @@ int main(int argc, char **argv)
 	} else {
 		if(argc == 3 || argc == 4) 
 			usage();
-		len = strlen("/etc/streams.cfg");
+		len = strlen("/etc/xilinx-tsn/streams.cfg");
 		path = (char*)malloc((len+1)*sizeof(char));
-		strcpy(path,"/etc/streams.cfg");
+		strcpy(path,"/etc/xilinx-tsn/streams.cfg");
 		strncpy(ifname, argv[1], IFNAMSIZ);
 	}
 	if( !config_read_file(&cfg, path) )

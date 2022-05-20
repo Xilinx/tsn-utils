@@ -2,7 +2,7 @@
 #SPDX-License-Identifier: MIT
  tadma_prog <interface>
 
-        Default configuration of streams is in /etc/streams.cfg
+        Default configuration of streams is in /etc/xilinx-tsn/streams.cfg
 
 Usage-2 :
  tadma_prog -c <interface> [file name]

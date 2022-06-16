@@ -33,6 +33,7 @@ install:
 	$(MAKE) -C tsn-apps/switch_prog install
 	$(MAKE) -C tsn-apps/tadma_prog install
 	$(MAKE) -C tsn-conf install
+	$(MAKE) -C tsn-scripts install
 
 .PHONY: clean
 clean:

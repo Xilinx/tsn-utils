@@ -178,7 +178,7 @@ void usage()
 	printf("Usage:\n qbv_sched [-s|-g|-c] <interface> [off] [file path] -f\n");
 	printf("interface : tsn interface name\n");
 	printf("file path : location of Qbv schedule."
-		"For example: /etc/qbv.cfg\n");
+		"For example: /etc/xilinx-tsn/qbv.cfg\n");
 	printf("-s : To set QBV schedule\n");
 	printf("-g : To get operative QBV schedule\n");
 	printf("-c : To use QBV schedule in the file at mentioned path\n");
@@ -250,9 +250,9 @@ set:
 	} else {
 		if(path)
 			free(path);
-		len = strlen("/etc/qbv.cfg");
+		len = strlen("/etc/xilinx-tsn/qbv.cfg");
 		path = (char*)malloc((len+1)*sizeof(char));
-		strcpy(path,"/etc/qbv.cfg");
+		strcpy(path,"/etc/xilinx-tsn/qbv.cfg");
 	}
 	if( !config_read_file(&cfg, path) )
 	{

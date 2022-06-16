@@ -4,7 +4,7 @@
 INSTALL_PROGRAM ?= install
 
 bindir ?= /usr/bin
-sysconfdir ?= /etc
+sysconfdir ?= /etc/xilinx-tsn
 
 .PHONY: install
 

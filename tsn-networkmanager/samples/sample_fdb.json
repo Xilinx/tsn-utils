@@ -1,0 +1,21 @@
+{
+           "ieee802-dot1q-bridge:bridges": {
+                      "bridge": [
+                                 {
+                                            "name": "xilinxBridge1",
+                                            "address": "00-00-00-00-00-00",
+                                            "bridge-type": "two-port-mac-relay-bridge",
+                                            "component": [
+                                                       {
+                                                                  "name": "xilinxBridge1",
+                                                                  "type": "s-vlan-component",
+                                                                  "ge-fdb:forwarding-table": {
+                                                                             "forwarding-entry": [
+                                                                             ]
+                                                                  }
+                                                       }
+                                            ]
+                                 }
+                      ]
+           }
+}

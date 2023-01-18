@@ -8,9 +8,8 @@ from subprocess import PIPE
 
 
 def program_device(mac, file_path):
-    device_ip = "192.168.1.30"  # temporary for testing
+    ipaddr = input("Please enter the IP address of the device \n")  # temporary
     proc = subprocess.run(["busybox"], stdout=PIPE, stderr=PIPE)
-    # print(proc.stdout)
     errorstring = "Command not found"
     if errorstring in str(proc.stdout):
         print("Busybox not found, please install busybox with tftp\n")
@@ -20,8 +19,8 @@ def program_device(mac, file_path):
         exit()
     if os.path.exists(file_path):
         remote_file_name = os.path.basename(file_path)
-        print("file exists\n" + file_path)
-        tftp_command = "busybox tftp -p -r " + remote_file_name + " -l " + file_path + " "+ device_ip
+        print("Sending " + file_path + " \n")
+        tftp_command = "busybox tftp -p -r " + remote_file_name + " -l " + file_path + " " + ipaddr
         try:
             os.system(tftp_command)
         except Exception as e:

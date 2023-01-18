@@ -14,10 +14,12 @@ def modify_schedule(mac,qbv_file_path,self=None):
     data = json.load(qbv_json)
     port_num = 0
     val = input("Enter the switch port whose qbv schedule needs to be modified:\n")
-    if val not in ["swp1", "swp2"]:
+    if val not in ["swp0","swp1", "swp2"]:
         print("Invalid Switch port name\n")
         qbv_json.close()
         return
+    if val == "swp0":
+        port_num = 0
     if val == "swp1":
         port_num = 1
     if val == "swp2":
@@ -69,6 +71,7 @@ def modify_schedule(mac,qbv_file_path,self=None):
     qbv_json.close()
     qbv_json = open(qbv_file_path, "w+")
     json.dump(data, qbv_json, indent=11)
-    tftp_nm.program_device(mac)
+    qbv_json.close()
+    tftp_nm.program_device(mac,qbv_file_path)
 
 

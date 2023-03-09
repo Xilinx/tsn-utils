@@ -94,10 +94,10 @@ def modify_existing_config():
             qbv_file_path = os.path.join(node_installation_path, node_name + "_qbv.json")
             ret = input("Qbv/fdb?\n").lower()
             if ret == "qbv":
-                qbv.modify_schedule(val, qbv_file_path)
+                qbv.modify_schedule(val.replace('-',':'), qbv_file_path)
             if ret == "fdb":
                 print(fdb_file_path)
-                fdb.add_fdb_main(val, fdb_file_path)
+                fdb.add_fdb_main(val.replace('-',':'), fdb_file_path)
     except Exception as e:
         print(e)
         exit()
@@ -165,6 +165,6 @@ if not os.path.isfile(network_file_path):
     json.dump(default_data, f, indent=3)
     f.close()
 
-Node_keys = ["Name", "Status", "FDB", "Bridge Qbv", "EP Qbv", "FRER"]
+Node_keys = ["Name", "Status", "FDB", "Qbv", "FRER"]
 
 display_MainConfig_options()

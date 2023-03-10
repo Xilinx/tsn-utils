@@ -1,0 +1,170 @@
+# -*- coding: utf-8 -*-
+"""
+Spyder Editor
+
+This is a temporary script file.
+"""
+
+import shutil
+import os
+import json
+import re
+import sys
+import subprocess
+from subprocess import PIPE
+import qbv
+import fdb
+
+user_opt = 0
+
+# Network bringup on the individual nodes is automated using xnm. IP address?
+# why do we need to touch IP address - file transfer will need.
+# TO-DO: IP address
+
+# Each node will a main configuration file,
+# which has all the details we are asking below and
+# points to individual protocol config files.
+# User can supply this top level config file directly through an argument
+# TO-DO:When the user supplies a config file, we will bypass through all
+# the UI, and go directly to the configuration.
+# Define an installation location(/etc/xilinx-tsn/network/)
+
+
+# Go to the location, find a network.json file (can be overridden by user)
+# network.json will have the list of active nodes in the network
+# Each of the nodes, will have a dictionary entry in the main json file
+# In the dictionary, we will have individual config file names and locations
+# To ID the node -> MAC address? (supposed to be fixed)
+
+# When you open an existing configuration, this main network.json file will be taken as an input.
+# For now single network.json file, and no autodiscovery. So this file needs to be edited manually to add/delete any nodes.
+
+# Define an internal YANG model, for the top level json, and use it to validate, if user specifies his own file.
+
+def create_new_node():
+    try:
+        node = dict.fromkeys(Node_keys)
+        val = input("Please enter the node's MAC address\n").lower()
+        if not re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", val):
+            print("Invalid MAC address\n")
+            return -1
+        node["Name"] = "node_" + val.replace(':', '').replace('-', '')
+        node_installation_path = os.path.join(installation_path, node["Name"])
+        if os.path.isdir(node_installation_path):
+            print("Node already exists\n")
+        else:
+            print("Creating new node")
+            os.system("mkdir " + node_installation_path)
+            node["status"] = "active"
+            node["FDB"] = os.path.join(node_installation_path, node["Name"] + "_fdb.json")
+            sample_fdb = os.path.join(samples_path, "sample_fdb.json")
+            os.system("cp " + sample_fdb + " " + node["FDB"])
+            node["Qbv"] = os.path.join(node_installation_path, node["Name"] + "_qbv.json")
+            sample_qbv = os.path.join(samples_path, "sample_qbv.json")
+            os.system("cp " + sample_qbv + " " + node["Qbv"])
+            if os.path.isfile(network_file_path):
+                f = open(network_file_path, "r+")
+                data = json.load(f)
+                print(data)
+                f.close()
+                f = open(network_file_path, "w+")
+                data["network-nodes"].append(node)
+                print(data)
+                json.dump(data, f, indent=3)
+                f.close()
+    except Exception as e:
+        print(e)
+        exit()
+
+
+def modify_existing_config():
+    show_current_nodes()
+    try:
+        val = input("Please enter the node's MAC address\n").lower()
+        if not re.match("[0-9a-f]{2}([-:]?)[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", val):
+            print("Invalid MAC address\n")
+            return -1
+        node_name = "node_" + val.replace(':', '').replace('-', '')
+        node_installation_path = os.path.realpath(os.path.join(installation_path , node_name))
+        print(node_installation_path)
+        if not os.path.isdir(node_installation_path):
+            print("Node doesn't exist\n")
+        else:
+            fdb_file_path = os.path.join(node_installation_path, node_name + "_fdb.json")
+            qbv_file_path = os.path.join(node_installation_path, node_name + "_qbv.json")
+            ret = input("Qbv/fdb?\n").lower()
+            if ret == "qbv":
+                qbv.modify_schedule(val.replace('-',':'), qbv_file_path)
+            if ret == "fdb":
+                print(fdb_file_path)
+                fdb.add_fdb_main(val.replace('-',':'), fdb_file_path)
+    except Exception as e:
+        print(e)
+        exit()
+
+
+def show_current_nodes():
+    print("Nodes currently added:")
+    if os.path.isfile(network_file_path):
+        f = open(network_file_path, "r+")
+        data = json.load(f)
+        for node in data["network-nodes"]:
+            print(node["Name"])
+        print("\n")
+        f.close()
+
+# TODO: Install node configuration to a user defined location
+def display_ConfFileLocation_options(node):
+    config_file_path = input("Please input a directory to which current configuration will be saved: ")
+    if not (os.path.isdir(config_file_path)):
+        print("This path does not exist: " + config_file_path)
+        return -1
+    node.config_file_path = config_file_path
+    return 0
+
+
+def display_MainConfig_options():
+    while (True):
+        try:
+            print("Please choose one of the options below:")
+            print("Option 1: Create new node")
+            print("Option 2: Modify existing node")
+            print("Option 3: Show current nodes")
+            print("Option 4: Exit")
+            user_opt = int(input("Please enter a number: \n"))
+            if user_opt == 1:
+                create_new_node()
+            elif user_opt == 2:
+                modify_existing_config()
+            elif user_opt == 3:
+                show_current_nodes()
+            elif user_opt == 4:
+                exit()
+            else:
+                print("Invalid option, Choose again")
+        except Exception as e:
+            print(e)
+
+
+print()
+print("Hi!".center(shutil.get_terminal_size().columns))
+print("Welcome to the TSN Network Management Engine".center(shutil.get_terminal_size().columns))
+print()
+installation_path = os.path.dirname(__file__)
+network_file_name = "tsn_network.json"
+network_file_path = os.path.join(installation_path, network_file_name)
+samples_path = os.path.join(installation_path, "samples")
+if not os.path.isdir(samples_path):
+    print("Sample files not installed properly\n")
+    exit()
+
+if not os.path.isfile(network_file_path):
+    f = open(network_file_path, "a")
+    default_data = dict.fromkeys(["network-nodes"])
+    default_data["network-nodes"] = []
+    json.dump(default_data, f, indent=3)
+    f.close()
+
+Node_keys = ["Name", "Status", "FDB", "Qbv", "FRER"]
+
+display_MainConfig_options()

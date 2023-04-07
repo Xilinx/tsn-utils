@@ -1,3 +1,8 @@
+################################################################
+# Copyright (c) 2022-2023 Advanced Micro Devices, Inc. All rights reserved.
+# SPDX-License-Identifier: MIT
+################################################################
+
 launch_parser (){
 	echo $1
 	if [[ $1 == *"qbv"* ]]; then

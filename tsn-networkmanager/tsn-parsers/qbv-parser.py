@@ -1,3 +1,8 @@
+################################################################
+# Copyright (c) 2022-2023 Advanced Micro Devices, Inc. All rights reserved.
+# SPDX-License-Identifier: MIT
+################################################################
+
 from __future__ import division
 from array import *
 import json

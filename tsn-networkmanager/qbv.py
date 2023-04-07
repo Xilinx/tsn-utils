@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Dec 13 18:12:24 2022
+################################################################
+# Copyright (c) 2022-2023 Advanced Micro Devices, Inc. All rights reserved.
+# SPDX-License-Identifier: MIT
+################################################################
 
-@author: pranavis
-"""
 import json
 import string
 import tftp_nm

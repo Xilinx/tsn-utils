@@ -30,7 +30,7 @@ def add_del_fdb(dmac, vids, port_str, rest_str, add):
                 cmd = "switch_cam2 -e "+  port_str + " -m " +  dmac + " -v " + str(vid) + rest_str
             else:
                 cmd = "switch_cam2 -d -m " + dmac + " -v " + str(vid)
-            print(cmd)
+            os.system(cmd)
 def fdb():
     num_entries = len(dmacs_all)
     if num_entries:
@@ -39,7 +39,7 @@ def fdb():
             add_del_fdb(dmacs_all[i],vids_all[i],"","",0)
     del dmacs_all [:]
     del vids_all [:]
-    with open("xilinxBridge1_fdb.json") as data_file:
+    with open(sys.argv[1]) as data_file:
         data = json.load(data_file)
     rest_str = ""
     for bridge_ll in data["ieee802-dot1q-bridge:bridges"]["bridge"]:
@@ -85,10 +85,7 @@ def fdb():
                 add_del_fdb(dmac, vids, port_str,rest_str, 0)
                 add_del_fdb(dmac, vids, port_str,rest_str, 1)
 
-with open("xilinxBridge1_fdb.json") as data_file:
-    data = json.load(data_file)
 fdb()
-data_file = "xilinxBridge1_fdb.json"
 while(1):
 	cmd = 'inotifywait -e modify %s' %(sys.argv[1])
 	while(os.system(cmd)):

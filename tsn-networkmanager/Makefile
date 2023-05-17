@@ -15,7 +15,7 @@ DESTDIR_SAMPLES = $(confdir)/samples
 
 SCRIPT = xcnc_setup fdb.py tftp_nm.py qbv.py
 PARSERS = tsn-parsers/fdb_parser.py tsn-parsers/qbv-parser.py tsn-parsers/xnm.sh tsn-parsers/board_config.sh
-SAMPLES = samples/sample_qbv.json samples/sample_fdb.json
+SAMPLES = samples/sample_qbv.json samples/sample_fdb.json samples/default_qbv.json
 
 
 .PHONY: install

@@ -108,7 +108,7 @@ def qbv_sched():
 			ptptime_ns = 0
 			now = Decimal(ptptime_s) + Decimal(ptptime_ns/(10**9))
 			first_interface = 0
-		if(now>=start_time):
+		if(now>=start_time and cycle_time != 0 and start_time > 0):
 			N = int ((now - start_time) / Decimal(cycle_time_sec))
 			start_time = start_time + Decimal( (N+1) * cycle_time_sec)
 			if ((start_time-now) < DELTA):

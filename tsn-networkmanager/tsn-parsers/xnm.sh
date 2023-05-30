@@ -34,9 +34,11 @@ fi
 
 config_file="${cwd}/board_config.sh"
 conffile="/usr/bin/ptp4l_master.conf"
-datadir="/home/ubuntu/datadir"
+datadir="/tftpboot"
 parserdir=${cwd}
 ip=192.168.1.99
+tftpd_conf="/etc/default/tftpd-hpa"
+tftp_options="--secure --create"
 
 if [ ! -f $config_file ]; then
         echo "$config_file not found, proceeding with default configuration"
@@ -50,22 +52,20 @@ if [ ! -d $parserdir ]; then
 fi
 
 if [ ! -d $datadir ]; then
-        mkdir $datadir
+        $SUDO mkdir $datadir
+        $SUDO chown tftp:tftp $datadir
+        $SUDO sed -i '/TFTP_DIRECTORY/d' "$tftpd_conf" && $SUDO sh -c "echo 'TFTP_DIRECTORY=\"$datadir\"' >> $tftpd_conf"
+        $SUDO sed -i '/TFTP_OPTIONS/d' "$tftpd_conf" && $SUDO sh -c "echo 'TFTP_OPTIONS=\"$tftp_options\"' >> $tftpd_conf"
+        $SUDO systemctl restart tftpd-hpa
 fi
 
-# Setup tftp server
-inetd_conf="/etc/inetd.conf"
-tftp_server_conf="69 dgram udp nowait root tftpd tftpd -c -l $datadir"
-
-pids=`pidof inetd`
-if [ "$pids" != "" ]; then
-        for pid in $pids
-        do
-                kill $pid
-        done
+# Check TFTP Server Status
+status=$($SUDO systemctl status tftpd-hpa | grep -o "running")
+echo "TFTP Server status:" $status
+if [ "$status" != "running" ]; then
+       echo "TFTP server is not running"
+       exit
 fi
-echo $tftp_server_conf >> $inetd_conf
-inetd
 
 # Obtain TSN MAC interface
 FND_EMAC=($(find /sys/devices/platform/ -iname  *tsn_emac_* | grep -i endpoint))

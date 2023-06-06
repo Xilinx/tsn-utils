@@ -33,7 +33,7 @@ else
 fi
 
 config_file="${cwd}/board_config.sh"
-conffile="/usr/bin/ptp4l_master.conf"
+ptp_conf_file="/usr/bin/ptp4l_master.conf"
 datadir="/tftpboot"
 parserdir=${cwd}
 ip=192.168.1.99
@@ -45,6 +45,25 @@ if [ ! -f $config_file ]; then
 else
         source $config_file
 fi
+
+while [ "$1" != "" ]; do
+	case $1 in
+        -f | --file )
+		conffile=$ptp_conf_file
+		;;
+	-m | --master )
+                conffile="/usr/bin/ptp4l_master.conf"
+		;;
+	-s | --slave )
+                conffile="/usr/bin/ptp4l_slave.conf"
+		;;
+	*)
+		echo "invalid argument '$1'"
+                exit
+		;;
+	esac
+	shift
+done
 
 if [ ! -d $parserdir ]; then
         echo "$parserdir not found"

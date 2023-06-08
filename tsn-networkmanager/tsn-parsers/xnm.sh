@@ -4,7 +4,14 @@
 # SPDX-License-Identifier: MIT
 ################################################################
 
-cwd="$( cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 ; pwd -P )"
+SCRIPTPATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 ; pwd -P )"
+
+if [ "$EUID" -ne 0 ]
+	then echo "Please enter the password for sudo access"
+	SUDO=sudo
+else
+	SUDO=
+fi
 
 launch_parser (){
 	echo $1
@@ -25,17 +32,10 @@ launch_parser (){
         fi
 }
 
-if [ "$EUID" -ne 0 ]
-	then echo "Please enter the password for sudo access"
-	SUDO=sudo
-else
-	SUDO=
-fi
-
-config_file="${cwd}/board_config.sh"
+config_file="${SCRIPTPATH}/board_config.sh"
 ptp_conf_file="/usr/bin/ptp4l_master.conf"
 datadir="/tftpboot"
-parserdir=${cwd}
+parserdir=${SCRIPTPATH}
 ip=192.168.1.99
 tftpd_conf="/etc/default/tftpd-hpa"
 tftp_options="--secure --create"

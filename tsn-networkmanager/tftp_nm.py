@@ -23,7 +23,6 @@ def get_device_ip(macaddr):
     return ip_addr
 
 def program_device(mac, file_path):
-    #ipaddr = input("Please enter the IP address of the device \n")  # temporary
     ipaddr = get_device_ip(mac)
     if(not ipaddr):
         print("Error obtaining IP address of " + mac + "\n")
@@ -39,7 +38,7 @@ def program_device(mac, file_path):
     if os.path.exists(file_path):
         remote_file_name = os.path.basename(file_path)
         print("Sending " + file_path + " \n")
-        tftp_command = "curl -T " + file_path + " tftp://" + ip_addr
+        tftp_command = "curl -T " + file_path + " tftp://" + ipaddr
         print(tftp_command)
         try:
             os.system(tftp_command)

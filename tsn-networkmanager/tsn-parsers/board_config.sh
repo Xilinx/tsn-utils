@@ -11,4 +11,5 @@ datadir="/tftpboot"
 parserdir=${cwd}
 tftpd_conf="/etc/default/tftpd-hpa"
 tftp_options="--secure --create"
-
+# keep the ptp_interface empty to use the default EMAC0
+ptp_interface=

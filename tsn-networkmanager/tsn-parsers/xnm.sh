@@ -126,7 +126,9 @@ if [ "$pids" != "" ]; then
                $SUDO kill $pid
        done
 fi
-$SUDO ptp4l -P -2 -H -i $EMAC0 -m -f $conffile >& .ptplog &
+
+$SUDO ptp4l -P -2 -H -i ${ptp_interface:-${EMAC0}} -m -f $conffile >& .ptplog &
+
 sleep 30
 tag=$( tail -n 3 .ptplog )
 if [ "$tag" == "" ]; then

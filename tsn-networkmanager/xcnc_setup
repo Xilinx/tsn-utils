@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 ################################################################
 # Copyright (c) 2022-2023 Advanced Micro Devices, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
@@ -12,12 +13,9 @@ import subprocess
 from subprocess import PIPE
 import qbv
 import fdb
+import readlink
 
 user_opt = 0
-
-# Network bringup on the individual nodes is automated using xnm. IP address?
-# why do we need to touch IP address - file transfer will need.
-# TO-DO: IP address
 
 # Each node will a main configuration file,
 # which has all the details we are asking below and
@@ -58,16 +56,14 @@ def create_new_node():
             sample_fdb = os.path.join(samples_path, "sample_fdb.json")
             os.system("cp " + sample_fdb + " " + node["FDB"])
             node["Qbv"] = os.path.join(node_installation_path, node["Name"] + "_qbv.json")
-            sample_qbv = os.path.join(samples_path, "sample_qbv.json")
+            sample_qbv = os.path.join(samples_path, "default_qbv.json")
             os.system("cp " + sample_qbv + " " + node["Qbv"])
             if os.path.isfile(network_file_path):
                 f = open(network_file_path, "r+")
                 data = json.load(f)
-                print(data)
                 f.close()
                 f = open(network_file_path, "w+")
                 data["network-nodes"].append(node)
-                print(data)
                 json.dump(data, f, indent=3)
                 f.close()
     except Exception as e:
@@ -94,7 +90,6 @@ def modify_existing_config():
             if ret == "qbv":
                 qbv.modify_schedule(val.replace('-',':'), qbv_file_path)
             if ret == "fdb":
-                print(fdb_file_path)
                 fdb.add_fdb_main(val.replace('-',':'), fdb_file_path)
     except Exception as e:
         print(e)
@@ -148,7 +143,7 @@ print()
 print("Hi!".center(shutil.get_terminal_size().columns))
 print("Welcome to the TSN Network Management Engine".center(shutil.get_terminal_size().columns))
 print()
-installation_path = os.path.dirname(__file__)
+installation_path = "/etc/tsn-networkmanager"
 network_file_name = "tsn_network.json"
 network_file_path = os.path.join(installation_path, network_file_name)
 samples_path = os.path.join(installation_path, "samples")

@@ -1,0 +1,125 @@
+{
+           "ietf-interfaces:interfaces": {
+                      "interface": [
+                                 {
+                                            "name": "swp0",
+                                            "type": "iana-if-type:ethernetCsmacd",
+                                            "enabled": true,
+                                            "ge-qbv:gate-parameters": {
+                                                       "gate-enabled": true,
+                                                       "admin-control-list": [
+                                                                  {
+                                                                             "index": 0,
+                                                                             "operation-name": "set-gate-states",
+                                                                             "sgs-params": {
+                                                                                        "gate-states-value": 1,
+                                                                                        "time-interval-value": 106718
+                                                                             }
+                                                                  },
+                                                                  {
+                                                                             "index": 1,
+                                                                             "operation-name": "set-gate-states",
+                                                                             "sgs-params": {
+                                                                                        "gate-states-value": 4,
+                                                                                        "time-interval-value": 17670
+                                                                             }
+                                                                  },
+                                                                  {
+                                                                             "index": 2,
+                                                                             "operation-name": "set-gate-states",
+                                                                             "sgs-params": {
+                                                                                        "gate-states-value": 1,
+                                                                                        "time-interval-value": 0
+                                                                             }
+                                                                  }
+                                                       ],
+                                                       "admin-cycle-time": 0,
+                                                       "admin-base-time": "1970-01-01T00:00:00.000-00:00",
+                                                       "admin-control-list-length": 3
+                                            }
+                                 },
+                                 {
+                                            "name": "swp1",
+                                            "type": "iana-if-type:ethernetCsmacd",
+                                            "enabled": true,
+                                            "ge-qbv:gate-parameters": {
+                                                       "gate-enabled": true,
+                                                       "admin-control-list": [
+                                                                  {
+                                                                             "index": 1,
+                                                                             "operation-name": "set-gate-states",
+                                                                             "sgs-params": {
+                                                                                        "gate-states-value": 1,
+                                                                                        "time-interval-value": 123000
+                                                                             }
+                                                                  },
+                                                                  {
+                                                                             "index": 2,
+                                                                             "operation-name": "set-gate-states",
+                                                                             "sgs-params": {
+                                                                                        "gate-states-value": 4,
+                                                                                        "time-interval-value": 456
+                                                                             }
+                                                                  }
+                                                       ],
+                                                       "admin-cycle-time": 0,
+                                                       "admin-base-time": "0",
+                                                       "admin-control-list-length": 2
+                                            }
+                                 },
+                                 {
+                                            "name": "swp2",
+                                            "type": "iana-if-type:ethernetCsmacd",
+                                            "enabled": true,
+                                            "ge-qbv:gate-parameters": {
+                                                       "gate-enabled": true,
+                                                       "admin-control-list": [
+                                                                  {
+                                                                             "index": 0,
+                                                                             "operation-name": "set-gate-states",
+                                                                             "sgs-params": {
+                                                                                        "gate-states-value": 1,
+                                                                                        "time-interval-value": 26124
+                                                                             }
+                                                                  },
+                                                                  {
+                                                                             "index": 1,
+                                                                             "operation-name": "set-gate-states",
+                                                                             "sgs-params": {
+                                                                                        "gate-states-value": 1,
+                                                                                        "time-interval-value": 171
+                                                                             }
+                                                                  },
+                                                                  {
+                                                                             "index": 2,
+                                                                             "operation-name": "set-gate-states",
+                                                                             "sgs-params": {
+                                                                                        "gate-states-value": 4,
+                                                                                        "time-interval-value": 9222
+                                                                             }
+                                                                  },
+                                                                  {
+                                                                             "index": 3,
+                                                                             "operation-name": "set-gate-states",
+                                                                             "sgs-params": {
+                                                                                        "gate-states-value": 4,
+                                                                                        "time-interval-value": 9222
+                                                                             }
+                                                                  },
+                                                                  {
+                                                                             "index": 4,
+                                                                             "operation-name": "set-gate-states",
+                                                                             "sgs-params": {
+                                                                                        "gate-states-value": 1,
+                                                                                        "time-interval-value": 0
+                                                                             }
+                                                                  }
+                                                       ],
+                                                       "admin-cycle-time": 0,
+                                                       "admin-base-time": "1970-01-01T00:00:00.000-00:00",
+                                                       "admin-control-list-length": 5
+                                            }
+                                 }
+                      ]
+           }
+}

@@ -108,7 +108,7 @@ def qbv_sched():
 			ptptime_ns = 0
 			now = Decimal(ptptime_s) + Decimal(ptptime_ns/(10**9))
 			first_interface = 0
-		if(now>=start_time):
+		if(now>=start_time and cycle_time != 0 and start_time > 0):
 			N = int ((now - start_time) / Decimal(cycle_time_sec))
 			start_time = start_time + Decimal( (N+1) * cycle_time_sec)
 			if ((start_time-now) < DELTA):
@@ -139,35 +139,23 @@ def qbv_sched():
                         os.system(cmd)
                         k = k + 1
 
-dir_path = "/sys/devices/platform/amba_pl@0"
+proc = subprocess.Popen(["find /sys/devices/platform/ -iname  *tsn_emac_* | grep -i endpoint"],shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+outs, errs = proc.communicate()
+outs = outs.decode().split("\n")
 swp1_ifname = ""
 swp2_ifname = ""
-if os.path.isdir(dir_path):
-    list_path = os.listdir(dir_path)
-    length = 0
-    str_tsn_dir = ""
-    tsn_emac_0 = ""
-    tsn_emac_1 = ""
-    for i in list_path:
-        if "tsn_endpoint" in i:
-            str_tsn_dir = i
-            break
-        else:
-            length = length + 1
-    if length == len(list_path):
-        print("Cannot find TSN Nodes")
-        exit()
-    list_tsn = os.listdir(os.path.join(dir_path, str_tsn_dir))
-    for i in list_tsn:
-        if "tsn_emac_0" in i:
-            tsn_emac_0 = i
-        if "tsn_emac_1" in i:
-            tsn_emac_1 = i
-    if tsn_emac_0 == "" or tsn_emac_1 == "":
-        print("Cannot find temac nodes")
-        exit()
-    swp1_ifname = os.listdir(os.path.join(dir_path,str_tsn_dir, tsn_emac_0 , "net"))[0]
-    swp2_ifname = os.listdir(os.path.join(dir_path,str_tsn_dir, tsn_emac_1 , "net"))[0]
+tsn_emac_0 = ""
+tsn_emac_1 = ""
+for i in outs:
+    if "tsn_emac_0" in i:
+        tsn_emac_0 = i
+    if "tsn_emac_1" in i:
+        tsn_emac_1 = i
+if tsn_emac_0 == "" or tsn_emac_1 == "":
+    print("Cannot find temac nodes")
+    exit()
+swp1_ifname = os.listdir(os.path.join(tsn_emac_0 , "net"))[0]
+swp2_ifname = os.listdir(os.path.join(tsn_emac_1 , "net"))[0]
 
 qbv_sched()
 while(1):

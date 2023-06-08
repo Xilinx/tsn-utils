@@ -1,13 +1,15 @@
+#!/bin/bash
 ################################################################
 # Copyright (c) 2022-2023 Advanced Micro Devices, Inc. All rights reserved.
 # SPDX-License-Identifier: MIT
 ################################################################
 
 ip=192.168.1.40
-epmac=00:0a:35:00:01:20
-eth0mac=00:0a:35:00:01:2e
-eth1mac=00:0a:35:00:01:2f
-conffile="/usr/bin/ptp4l_master.conf"
-ptp_interface=eth0
-datadir="/home/root/datadir"
-parserdir="/home/root/parserdir"
+cwd="$( cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 ; pwd -P )"
+ptp_conf_file="/usr/bin/ptp4l_master.conf"
+datadir="/tftpboot"
+parserdir=${cwd}
+tftpd_conf="/etc/default/tftpd-hpa"
+tftp_options="--secure --create"
+# keep the ptp_interface empty to use the default EMAC0
+ptp_interface=

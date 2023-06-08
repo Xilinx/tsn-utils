@@ -39,7 +39,7 @@ def program_device(mac, file_path):
     if os.path.exists(file_path):
         remote_file_name = os.path.basename(file_path)
         print("Sending " + file_path + " \n")
-        tftp_command = "busybox tftp -p -r " + remote_file_name + " -l " + file_path + " " + ipaddr
+        tftp_command = "curl -T " + file_path + " tftp://" + ip_addr
         print(tftp_command)
         try:
             os.system(tftp_command)

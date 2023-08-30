@@ -35,12 +35,10 @@ else
 fi
 
 # Check to ensure TSN Overlay is loaded
-if [ "$HOSTNAME" = "kria" ]; then
-	OVERLAY=$($SUDO xmutil listapps | grep tsn-rs485pmod | cut -d ')' -f2 | tr ',' ' ' | tr -d ' ')
-	if [ "$OVERLAY" == "-1" ]; then
-		echo "Please load tsn-rs485pmod overlay using xmutil and try again"
-		return 1
-	fi
+OVERLAY=$($SUDO xmutil listapps | grep -E 'tsn-rs485pmod|motor-ctrl-qei' | cut -d ')' -f2 | tr ',' ' ' | tr -d ' ')
+if [[ "$OVERLAY" != *0* ]]; then
+	echo "Please load TSN application overlay using xmutil and try again"
+	return 1
 fi
 
 if [ ! -f /etc/modprobe.d/generic-uio.conf ]; then

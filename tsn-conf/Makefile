@@ -4,12 +4,13 @@
 INSTALL_PROGRAM ?= install
 
 bindir ?= /usr/bin
-sysconfdir ?= /etc/xilinx-tsn
+sysconfdir ?= /etc
+confdir = $(sysconfdir)/xilinx-tsn
 
 .PHONY: install
 
 install:
 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(bindir)
 	$(INSTALL_PROGRAM) -m 0644 *.conf $(DESTDIR)$(bindir)
-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(sysconfdir)
-	$(INSTALL_PROGRAM) -m 0644 *.cfg $(DESTDIR)$(sysconfdir)
+	$(INSTALL_PROGRAM) -d $(DESTDIR)$(confdir)
+	$(INSTALL_PROGRAM) -m 0644 *.cfg $(DESTDIR)$(confdir)

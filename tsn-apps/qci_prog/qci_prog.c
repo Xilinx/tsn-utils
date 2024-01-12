@@ -92,7 +92,11 @@ int switch_qci_ioctl(int cmd, struct qci *data)
 	return 0;
 }
 
-#if 0
+int psfp_control(struct qci *data)
+{
+	return switch_qci_ioctl(PSFP_CONTROL, data);
+}
+
 int enable_metering (bool state) {
 	struct qci data = {0};
 
@@ -111,22 +115,6 @@ int enable_streaming (bool state) {
 	data.psfp_conf_data.wr_op_type = WR_EN_PSFP_MASK;
 	data.psfp_conf_data.op_type = WRITE_MASK;
 	return psfp_control(&data);
-}
-
-int enable_streaming (bool state) {
-	struct qci data = {0};
-
-	/* program PSFP for write */
-	data.psfp_conf_data.en_psfp = state;
-	data.psfp_conf_data.wr_op_type = WR_EN_PSFP_MASK;
-	data.psfp_conf_data.op_type = WRITE_MASK;
-	return psfp_control(&data);
-}
-#endif
-
-int psfp_control(struct qci *data)
-{
-	return switch_qci_ioctl(PSFP_CONTROL, data);
 }
 
 int config_all(struct qci data)
@@ -356,6 +344,40 @@ int get_psfp_counter(struct qci *data, unsigned char num)
 	return switch_qci_ioctl(GET_STATIC_PSFP_COUNTER, data);
 }
 
+int convert_bandwidth(char *value_str, unsigned int *value) {
+	size_t len = strlen(value_str);
+	char unit = value_str[len - 1];
+	char *numeric_str = strndup(value_str, len - 1);
+
+	if (numeric_str == NULL) {
+		printf("ERROR: Failed to allocate memory\n");
+		return -1;
+	}
+
+	unsigned int numeric_value = atoi(numeric_str);
+	free(numeric_str);
+
+	switch (unit) {
+	case 'K':
+	case 'k':
+		*value = numeric_value * 1000; // convert to bps
+		break;
+	case 'M':
+	case 'm':
+		*value = numeric_value * 1000000; // convert to bps
+		break;
+	case 'G':
+	case 'g':
+		*value = numeric_value * 1000000000; // convert to bps
+		break;
+	default:
+		*value = atoi(value_str);
+		break;
+	}
+
+	return 0;
+}
+
 #define ST_ARG_NUM			3
 #define MTR_ARG_NUM			7
 #define ALL_ARG_NUM			9
@@ -368,9 +390,9 @@ void usage() {
 	printf("qci_prog -s <ingress port> <max frame size> <gate id> <meter en> <stream en> <psfp en>\n");
 	printf("(meter en, stream en and psfp en are optional here, default value will be 0)\n\n");
 	printf("For programing meter memory :\n");
-	printf("qci_prog -m <CIR> <EIR> <CBR> <EBR> <mode> <meter id> <gate id>\n\n");
+	printf("qci_prog -m <CIR[KMG]> <EIR[KMG]> <CBR> <EBR> <mode> <meter id> <gate id>\n\n");
 	printf("For both memory in one shot:\n");
-	printf("qci_prog -a <ingress port> <max frame size> <CIR> <EIR> <CBR>" \
+	printf("qci_prog -a <ingress port> <max frame size> <CIR[KMG]> <EIR[KMG]> <CBR>" \
 			" <EBR> <mode> <gate id> <meter id> "	\
 			"<meter gate state> <filtering gate stream> "	\
 			"<psfp valid>\n");
@@ -381,6 +403,7 @@ void usage() {
 	printf("qci_prog -r meter <meter id>\n\n");
 	printf("For reading PSFP statistic counters:\n");
 	printf("qci_prog -r counter <gate id>\n\n");
+	printf("[KMG] indicates the unit of Kbs, Mbs, or Gbs for CIR and EIR, where 1K = 1000, 1M = 1,000,000, 1G = 1,000,000,000.\n");
 	printf("HELP:\n");
 	printf("qci_prog -h\n\n");
 	printf("All values in decimals, except ingress port - swp1 | swp2\n");
@@ -435,12 +458,35 @@ while((opt = getopt(argc, argv, "hs:m:c:a:r:")) != -1)
 	break;
 	case 'm':
 		i = 0;
-		for (index = optind - 1; index < argc; index++) {
-			if(argv[index][0] == '-')
-				break;
-			meter[i++] = strtoul(argv[index], NULL, 10);
+                // Modify case 'm' to use convert_bandwidth for meter[0] and meter[1]
+                if (optind < argc) {
+                    if (convert_bandwidth(argv[optind - 1], &meter[0]) != 0) {
+                        printf("ERROR: Failed to convert bandwidth value for CIR\n");
+                        return -1;
+                    }
+                } else {
+                    printf("ERROR: Missing value for bandwidth unit\n");
+                    return -1;
+                }
+
+                if (optind < argc) {
+                    if (convert_bandwidth(argv[optind], &meter[1]) != 0) {
+                        printf("ERROR: Failed to convert bandwidth value for EIR\n");
+                        return -1;
+                    }
+                } else {
+                    printf("ERROR: Missing value for bandwidth unit\n");
+                    return -1;
+                }
+		for (int i = 2; i < MTR_ARG_NUM; ++i) {
+			if (optind++ < argc) {
+				meter[i] = strtoul(argv[optind], NULL, 10);
+			} else {
+				printf("ERROR: Missing value for meter configuration\n");
+				return -1;
+			}
 		}
-		prog_meter_mem = i;
+		prog_meter_mem = MTR_ARG_NUM;
 	break;
 	case 'a':
 		i = 0;
@@ -456,6 +502,11 @@ while((opt = getopt(argc, argv, "hs:m:c:a:r:")) != -1)
                                         printf("ERROR : port name is invalid\n");
                                         usage();
                                 }
+			} else if (index == 4 || index == 5) { // CIR and EIR positions
+				if (convert_bandwidth(argv[index], &all[i++]) != 0) {
+					printf("ERROR: Failed to convert bandwidth value for CIR or EIR\n");
+					return -1;
+				}
                         } else {
 				all[i++] = strtoul(argv[index], NULL, 10);
 			}

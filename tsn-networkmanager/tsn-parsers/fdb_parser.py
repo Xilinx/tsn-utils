@@ -5,11 +5,11 @@
 
 from __future__ import division
 from array import *
-import json
 import io
 import os
 import sys
 import re
+from common import load_json
 
 dmacs_all = []
 vids_all = []
@@ -39,8 +39,9 @@ def fdb():
             add_del_fdb(dmacs_all[i],vids_all[i],"","",0)
     del dmacs_all [:]
     del vids_all [:]
-    with open(sys.argv[1]) as data_file:
-        data = json.load(data_file)
+    data = load_json(sys.argv[1])
+    if not data:
+        return
     rest_str = ""
     for bridge_ll in data["ieee802-dot1q-bridge:bridges"]["bridge"]:
         for component_ll in bridge_ll["component"]:

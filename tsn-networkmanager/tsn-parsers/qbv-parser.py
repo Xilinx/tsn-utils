@@ -5,7 +5,6 @@
 
 from __future__ import division
 from array import *
-import json
 import libconf
 import io
 import os
@@ -17,11 +16,13 @@ import time
 import math
 from decimal import *
 import shlex, subprocess
+from common import load_json
 DELTA = 0.1
 
 def qbv_sched():
-	with open(sys.argv[1]) as data_file:
-		data = json.load(data_file)
+	data = load_json(sys.argv[1])
+	if not data:
+		return
 	#Creating a temporary qbv config file
 	f = open('qbv_cfg_bridge_tmp', 'w')
 	f.write('qbv =\n{\n')

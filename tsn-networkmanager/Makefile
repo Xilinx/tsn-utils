@@ -14,7 +14,7 @@ confdir = $(sysconfdir)/tsn-networkmanager/
 DESTDIR_SAMPLES = $(confdir)/samples
 
 SCRIPT = xcnc_setup fdb.py tftp_nm.py qbv.py
-PARSERS = tsn-parsers/fdb_parser.py tsn-parsers/qbv-parser.py tsn-parsers/xnm.sh tsn-parsers/board_config.sh tsn-parsers/mac_setup.sh
+PARSERS = tsn-parsers/fdb_parser.py tsn-parsers/qbv-parser.py tsn-parsers/common.py tsn-parsers/xnm.sh tsn-parsers/board_config.sh tsn-parsers/mac_setup.sh
 SAMPLES = samples/sample_qbv.json samples/sample_fdb.json samples/default_qbv.json
 
 

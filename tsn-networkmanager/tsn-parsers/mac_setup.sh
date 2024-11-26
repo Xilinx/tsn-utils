@@ -19,14 +19,14 @@ EMAC1=`echo $(ls ${FND_EMAC[1]}/net/)`
 EP=${EP:-ep}
 
 # Obtain MAC Address
-HW_ADDR_EMAC0=`echo $($SUDO xmutil boardid | grep PL.MAC.ID.0:) | awk -F'0: ' '{print $2}'`
+HW_ADDR_EMAC0=`echo $($SUDO xmutil boardid --ignore-errors | grep PL.MAC.ID.0:) | awk -F'0: ' '{print $2}'`
 if ! echo $HW_ADDR_EMAC0 | grep -q ':'
 then
     HW_ADDR_EMAC0=$(echo "$HW_ADDR_EMAC0" | sed 's/../&:/g;s/:$//')
 fi
 echo "$EMAC0 MAC: $HW_ADDR_EMAC0"
 
-HW_ADDR_EMAC1=`echo $($SUDO xmutil boardid | grep PL.MAC.ID.1:) | awk -F'1: ' '{print $2}'`
+HW_ADDR_EMAC1=`echo $($SUDO xmutil boardid --ignore-errors | grep PL.MAC.ID.1:) | awk -F'1: ' '{print $2}'`
 if ! echo $HW_ADDR_EMAC1 | grep -q ':'
 then
    HW_ADDR_EMAC1=$(echo "$HW_ADDR_EMAC1" | sed 's/../&:/g;s/:$//')

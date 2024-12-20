@@ -37,7 +37,7 @@ struct tadma_stream {
 	unsigned short vid;
 	unsigned int trigger;
 	unsigned int count;
-	unsigned char start;
+	unsigned char qno;
 };
 
 int change_to_continuous(char *ifname)
@@ -80,6 +80,7 @@ int flush_stream(char *ifname)
 		perror("TADMA stream flush failed");
 	}
 	close(fd);
+	return ret;
 }
 int add_stream(struct tadma_stream *stream, char *ifname)
 {
@@ -102,6 +103,7 @@ int add_stream(struct tadma_stream *stream, char *ifname)
 		perror("TADMA stream add failed");
 	}
 	close(fd);
+	return ret;
 }
 
 int program_all_streams(char *ifname)
@@ -170,7 +172,7 @@ int main(int argc, char **argv)
 		strncpy(ifname, argv[1], IFNAMSIZ);
 		flush_stream(ifname);
 		change_to_continuous(ifname);
-		return;
+		return 0;
 	} else {
 		if(argc == 3 || argc == 4) 
 			usage();
@@ -205,7 +207,7 @@ int main(int argc, char **argv)
 		for(i = 0; i < loop; i++)
 		{
 			const char *mac_buf;
-			int vid, trigger, count;
+			int vid, trigger, count, qno = -1;
 			unsigned char mac[6];
 
 
@@ -219,22 +221,30 @@ int main(int argc, char **argv)
 			&mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
 
 			config_setting_lookup_int(cs, "vid", &vid);
+			config_setting_lookup_int(cs, "qno", &qno);
 			config_setting_lookup_int(cs, "trigger", &trigger);
 			config_setting_lookup_int(cs, "count", &count);
 
-			stream[i]->vid = (unsigned short)vid;
-			stream[i]->trigger = (unsigned int)trigger;
 			if(count > 4) {
 				printf("Error: count value should not be greater than 4\n");
 				goto end;
 			}
+
+			if (qno == -1) {
+				printf("Warning: Queue number is missing. It must be specified"
+				       " if number of TCs exceeds three.\n");
+			}
+
+			stream[i]->vid = (unsigned short)vid;
+			stream[i]->trigger = (unsigned int)trigger;
 			stream[i]->count = (unsigned int)count;
-			stream[i]->start = (unsigned char)i?0:1;
+			stream[i]->qno = (unsigned char)qno;
 
 			memcpy(stream[i]->dmac, mac, 6);
 
-			printf("%s vid: %d trigger: %d\n", mac_buf,
-					stream[i]->vid, stream[i]->trigger);
+			printf("%s vid: %d, qno: %d, trigger: %d\n", mac_buf,
+			       stream[i]->vid, stream[i]->qno,
+			       stream[i]->trigger);
 		}
 		qsort(stream, loop, sizeof(struct tadma_stream*), sortbytrigger);
 		flush_stream(ifname);

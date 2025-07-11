@@ -247,6 +247,14 @@ int main(int argc, char **argv)
 			       stream[i]->trigger);
 		}
 		qsort(stream, loop, sizeof(struct tadma_stream*), sortbytrigger);
+		for (i = 1; i < loop; i++) {
+			if (stream[i]->trigger == stream[i - 1]->trigger) {
+				printf("Error: Multiple streams with same trigger time %d is not supported\n",
+				       stream[i]->trigger);
+				goto end;
+			}
+		}
+
 		flush_stream(ifname);
 		for(i = 0; i < loop; i++)
 		{

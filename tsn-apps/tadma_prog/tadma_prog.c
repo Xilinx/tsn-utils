@@ -44,14 +44,13 @@ struct tadma_stream {
 };
 
 int sortbytrigger(const void *i1, const void *i2)  {
-	struct tadma_stream **a = (struct tadma_stream **)i1;
-	struct tadma_stream **b = (struct tadma_stream **)i2;
-	return ((*a)->trigger - (*b)->trigger);
+	struct tadma_stream *a = (struct tadma_stream *)i1;
+	struct tadma_stream *b = (struct tadma_stream *)i2;
+	return (a->trigger - b->trigger);
 }
 
 int get_streams(char *ifname)
 {
-	struct tadma_stream *stream_ptrs[MAX_STREAMS];
 	struct tadma_stream streams[MAX_STREAMS];
 	struct ifreq s;
 	int ret;
@@ -79,21 +78,18 @@ int get_streams(char *ifname)
 		return 0;
 	}
 
-	for (i = 0; i < ret; i++) {
-		stream_ptrs[i] = &streams[i];
-	}
-	qsort(stream_ptrs, ret, sizeof(struct tadma_stream*), sortbytrigger);
+	qsort(streams, ret, sizeof(*streams), sortbytrigger);
 
 	printf("Configured TADMA Streams:\n");
 	for (i = 0; i < ret; i++) {
 		printf("Stream %d: MAC %02x:%02x:%02x:%02x:%02x:%02x, VID %u, QNO %u, Trigger %u, Count %u\n",
 				i,
-				stream_ptrs[i]->dmac[0], stream_ptrs[i]->dmac[1], stream_ptrs[i]->dmac[2],
-				stream_ptrs[i]->dmac[3], stream_ptrs[i]->dmac[4], stream_ptrs[i]->dmac[5],
-				stream_ptrs[i]->vid,
-				stream_ptrs[i]->qno,
-				stream_ptrs[i]->trigger,
-				stream_ptrs[i]->count);
+				streams[i].dmac[0], streams[i].dmac[1], streams[i].dmac[2],
+				streams[i].dmac[3], streams[i].dmac[4], streams[i].dmac[5],
+				streams[i].vid,
+				streams[i].qno,
+				streams[i].trigger,
+				streams[i].count);
 	}
 	close(fd);
 	return 0;
@@ -210,7 +206,7 @@ int main(int argc, char **argv)
 	char ifname[IFNAMSIZ];
 	int i;
 	int ch;
-	struct tadma_stream **stream;
+	struct tadma_stream *stream;
 	char *path;
 	int len;
 
@@ -259,9 +255,7 @@ int main(int argc, char **argv)
 			usage();	
 		}
 		
-		stream = malloc(sizeof(struct tadma_stream*) * loop);
-		for(i = 0; i < loop; i++)
-		stream[i] = malloc(sizeof(struct tadma_stream));
+		stream = malloc(sizeof(*stream) * loop);
 		/* TODO */
 		/* if( count > stream_count) */
 		for(i = 0; i < loop; i++)
@@ -295,22 +289,22 @@ int main(int argc, char **argv)
 				       " if number of TCs exceeds three.\n");
 			}
 
-			stream[i]->vid = (unsigned short)vid;
-			stream[i]->trigger = (unsigned int)trigger;
-			stream[i]->count = (unsigned int)count;
-			stream[i]->qno = (unsigned char)qno;
+			stream[i].vid = (unsigned short)vid;
+			stream[i].trigger = (unsigned int)trigger;
+			stream[i].count = (unsigned int)count;
+			stream[i].qno = (unsigned char)qno;
 
-			memcpy(stream[i]->dmac, mac, 6);
+			memcpy(stream[i].dmac, mac, 6);
 
 			printf("%s vid: %d, qno: %d, trigger: %d\n", mac_buf,
-			       stream[i]->vid, stream[i]->qno,
-			       stream[i]->trigger);
+				   stream[i].vid, stream[i].qno,
+				   stream[i].trigger);
 		}
-		qsort(stream, loop, sizeof(struct tadma_stream*), sortbytrigger);
+		qsort(stream, loop, sizeof(*stream), sortbytrigger);
 		for (i = 1; i < loop; i++) {
-			if (stream[i]->trigger == stream[i - 1]->trigger) {
+			if (stream[i].trigger == stream[i - 1].trigger) {
 				printf("Error: Multiple streams with same trigger time %d is not supported\n",
-				       stream[i]->trigger);
+				   stream[i].trigger);
 				goto end;
 			}
 		}
@@ -318,15 +312,10 @@ int main(int argc, char **argv)
 		flush_stream(ifname);
 		for(i = 0; i < loop; i++)
 		{
-			//printf("vid: %d trigger: %d\n",
-			//		stream[i]->vid, stream[i]->trigger);
-			add_stream(stream[i], ifname);
+			add_stream(&stream[i], ifname);
 		}
 		program_all_streams(ifname);
 end:
-		for(i = 0; i < loop; i++)
-		free(stream[i]);
-		
 		free(stream);
 	}
 }

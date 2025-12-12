@@ -16,6 +16,8 @@
 #include <libconfig.h>
 #include <errno.h>
 
+#define MAX_STREAMS 128
+
 enum axienet_tsn_ioctl {
 	SIOCCHIOCTL = SIOCDEVPRIVATE,
 	SIOC_GET_SCHED,
@@ -30,6 +32,7 @@ enum axienet_tsn_ioctl {
 	SIOC_TADMA_STR_FLUSH,
 	SIOC_PREEMPTION_RECEIVE,
 	SIOC_TADMA_OFF,
+	SIOC_TADMA_GET_STREAMS,
 };
 
 struct tadma_stream {
@@ -39,6 +42,58 @@ struct tadma_stream {
 	unsigned int count;
 	unsigned char qno;
 };
+
+int sortbytrigger(const void *i1, const void *i2)  {
+	struct tadma_stream *a = (struct tadma_stream *)i1;
+	struct tadma_stream *b = (struct tadma_stream *)i2;
+	return (a->trigger - b->trigger);
+}
+
+int get_streams(char *ifname)
+{
+	struct tadma_stream streams[MAX_STREAMS];
+	struct ifreq s;
+	int ret;
+	int fd;
+	int i;
+
+	fd = socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
+	if (fd < 0) {
+		perror("socket");
+		return -1;
+	}
+
+	strcpy(s.ifr_name, ifname);
+	s.ifr_data = (void *)streams;
+	ret = ioctl(fd, SIOC_TADMA_GET_STREAMS, &s);
+	if (ret < 0) {
+		perror("TADMA get streams failed");
+		close(fd);
+		return ret;
+	}
+
+	if (ret == 0) {
+		printf("No TADMA streams configured\n");
+		close(fd);
+		return 0;
+	}
+
+	qsort(streams, ret, sizeof(*streams), sortbytrigger);
+
+	printf("Configured TADMA Streams:\n");
+	for (i = 0; i < ret; i++) {
+		printf("Stream %d: MAC %02x:%02x:%02x:%02x:%02x:%02x, VID %u, QNO %u, Trigger %u, Count %u\n",
+				i,
+				streams[i].dmac[0], streams[i].dmac[1], streams[i].dmac[2],
+				streams[i].dmac[3], streams[i].dmac[4], streams[i].dmac[5],
+				streams[i].vid,
+				streams[i].qno,
+				streams[i].trigger,
+				streams[i].count);
+	}
+	close(fd);
+	return 0;
+}
 
 int change_to_continuous(char *ifname)
 {
@@ -129,12 +184,6 @@ int program_all_streams(char *ifname)
 	close(fd);
 }
 
-int sortbytrigger(const void *i1, const void *i2)  {
-    struct tadma_stream **a = (struct tadma_stream **)i1;
-    struct tadma_stream **b = (struct tadma_stream **)i2;
-    return ((*a)->trigger - (*b)->trigger);
-}
-
 void usage()
 {
 	printf("Usage-1 :\n tadma_prog <interface>\n");
@@ -143,6 +192,8 @@ void usage()
 	printf("	file name : user defined streams's configuration. Ex: streams_01.cfg\n");
 	printf("Usage-3 :\n tadma_prog <interface> off\n");
 	printf("	Programs TADMA back to continuous mode\n");
+	printf("Usage-4 :\n tadma_prog -g <interface>\n");
+	printf("	Display currently configured TADMA streams\n");
 	printf("-c : To use the configuration of streams in the file at mentioned path\n");
 	exit(1);
 }
@@ -155,7 +206,7 @@ int main(int argc, char **argv)
 	char ifname[IFNAMSIZ];
 	int i;
 	int ch;
-	struct tadma_stream **stream;
+	struct tadma_stream *stream;
 	char *path;
 	int len;
 
@@ -173,6 +224,10 @@ int main(int argc, char **argv)
 		flush_stream(ifname);
 		change_to_continuous(ifname);
 		return 0;
+	} else if (argc == 3 && strcmp(argv[1], "-g") == 0) {
+		strncpy(ifname, argv[2], IFNAMSIZ);
+		get_streams(ifname);
+		return 0;
 	} else {
 		if(argc == 3 || argc == 4) 
 			usage();
@@ -181,6 +236,7 @@ int main(int argc, char **argv)
 		strcpy(path,"/etc/xilinx-tsn/streams.cfg");
 		strncpy(ifname, argv[1], IFNAMSIZ);
 	}
+
 	if( !config_read_file(&cfg, path) )
 	{
 		config_destroy(&cfg);
@@ -199,9 +255,7 @@ int main(int argc, char **argv)
 			usage();	
 		}
 		
-		stream = malloc(sizeof(struct tadma_stream*) * loop);
-		for(i = 0; i < loop; i++)
-		stream[i] = malloc(sizeof(struct tadma_stream));
+		stream = malloc(sizeof(*stream) * loop);
 		/* TODO */
 		/* if( count > stream_count) */
 		for(i = 0; i < loop; i++)
@@ -235,22 +289,22 @@ int main(int argc, char **argv)
 				       " if number of TCs exceeds three.\n");
 			}
 
-			stream[i]->vid = (unsigned short)vid;
-			stream[i]->trigger = (unsigned int)trigger;
-			stream[i]->count = (unsigned int)count;
-			stream[i]->qno = (unsigned char)qno;
+			stream[i].vid = (unsigned short)vid;
+			stream[i].trigger = (unsigned int)trigger;
+			stream[i].count = (unsigned int)count;
+			stream[i].qno = (unsigned char)qno;
 
-			memcpy(stream[i]->dmac, mac, 6);
+			memcpy(stream[i].dmac, mac, 6);
 
 			printf("%s vid: %d, qno: %d, trigger: %d\n", mac_buf,
-			       stream[i]->vid, stream[i]->qno,
-			       stream[i]->trigger);
+				   stream[i].vid, stream[i].qno,
+				   stream[i].trigger);
 		}
-		qsort(stream, loop, sizeof(struct tadma_stream*), sortbytrigger);
+		qsort(stream, loop, sizeof(*stream), sortbytrigger);
 		for (i = 1; i < loop; i++) {
-			if (stream[i]->trigger == stream[i - 1]->trigger) {
+			if (stream[i].trigger == stream[i - 1].trigger) {
 				printf("Error: Multiple streams with same trigger time %d is not supported\n",
-				       stream[i]->trigger);
+				   stream[i].trigger);
 				goto end;
 			}
 		}
@@ -258,15 +312,10 @@ int main(int argc, char **argv)
 		flush_stream(ifname);
 		for(i = 0; i < loop; i++)
 		{
-			//printf("vid: %d trigger: %d\n",
-			//		stream[i]->vid, stream[i]->trigger);
-			add_stream(stream[i], ifname);
+			add_stream(&stream[i], ifname);
 		}
 		program_all_streams(ifname);
 end:
-		for(i = 0; i < loop; i++)
-		free(stream[i]);
-		
 		free(stream);
 	}
 }

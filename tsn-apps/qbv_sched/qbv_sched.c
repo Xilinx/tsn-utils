@@ -276,8 +276,11 @@ set:
 
 		printf("cycle_time: %d\n", prog.cycle_time);
 
-		if(prog.cycle_time == 0)
+		if(prog.cycle_time == 0) {
 			printf("Opening all gates\n");
+			set_schedule(&prog, ifname);
+			goto out;
+		}
 
 		if(prog.cycle_time > MAX_CYCLE_TIME)
 		{

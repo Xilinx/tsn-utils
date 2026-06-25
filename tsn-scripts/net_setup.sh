@@ -35,9 +35,9 @@ else
 fi
 
 # Check to ensure TSN Overlay is loaded
-OVERLAY=$($SUDO xmutil listapps | grep -E 'tsn-rs485pmod|motor-ctrl-qei' | cut -d ')' -f2 | tr ',' ' ' | tr -d ' ')
+OVERLAY=$($SUDO dfx-mgr-client -listPackage | awk '/tsn-rs485pmod|motor-ctrl-qei/ {printf "%s ", $4}')
 if [[ "$OVERLAY" != *0* ]]; then
-	echo "Please load TSN application overlay using xmutil and try again"
+	echo "Please load TSN application overlay using dfx-mgr-client and try again"
 	return 1
 fi
 

@@ -18,20 +18,43 @@ EMAC0=`echo $(ls ${FND_EMAC[0]}/net/)`
 EMAC1=`echo $(ls ${FND_EMAC[1]}/net/)`
 EP=${EP:-ep}
 
-# Obtain MAC Address
-HW_ADDR_EMAC0=`echo $($SUDO xmutil boardid --ignore-errors | grep PL.MAC.ID.0:) | awk -F'0: ' '{print $2}'`
-if ! echo $HW_ADDR_EMAC0 | grep -q ':'
-then
-    HW_ADDR_EMAC0=$(echo "$HW_ADDR_EMAC0" | sed 's/../&:/g;s/:$//')
-fi
-echo "$EMAC0 MAC: $HW_ADDR_EMAC0"
+# Get Board Code
+FRU_FILE="/sys/devices/platform/axi/ff030000.i2c/i2c-1/1-0051/eeprom"
+board_code=$($SUDO ipmi-fru --fru-file=$FRU_FILE --interpret-oem-data | awk -F'[-:]' '/FRU Board Product Name/ {print $3}')
 
-HW_ADDR_EMAC1=`echo $($SUDO xmutil boardid --ignore-errors | grep PL.MAC.ID.1:) | awk -F'1: ' '{print $2}'`
-if ! echo $HW_ADDR_EMAC1 | grep -q ':'
-then
-   HW_ADDR_EMAC1=$(echo "$HW_ADDR_EMAC1" | sed 's/../&:/g;s/:$//')
+# Obtain MAC Address
+if [[ "$board_code" == "KR" ]]; then
+    HW_ADDR_EMAC0=`echo $($SUDO ipmi-fru --fru-file=$FRU_FILE --interpret-oem-data | grep FRU.OEM.MAC.ID.1:) | awk -F'1: ' '{print $2}'`
+    if ! echo $HW_ADDR_EMAC0 | grep -q ':'
+    then
+        HW_ADDR_EMAC0=$(echo "$HW_ADDR_EMAC0" | sed 's/../&:/g;s/:$//')
+    fi
+    echo "$EMAC0 MAC: $HW_ADDR_EMAC0"
+
+    HW_ADDR_EMAC1=`echo $($SUDO ipmi-fru --fru-file=$FRU_FILE --interpret-oem-data | grep FRU.OEM.MAC.ID.2:) | awk -F'2: ' '{print $2}'`
+    if ! echo $HW_ADDR_EMAC1 | grep -q ':'
+    then
+        HW_ADDR_EMAC1=$(echo "$HW_ADDR_EMAC1" | sed 's/../&:/g;s/:$//')
+    fi
+    echo "$EMAC1 MAC: $HW_ADDR_EMAC1"
+elif [[ "$board_code" == "KD" ]]; then
+    HW_ADDR_EMAC0=`echo $($SUDO ipmi-fru --fru-file=$FRU_FILE --interpret-oem-data | grep FRU.OEM.MAC.ID.0:) | awk -F'0: ' '{print $2}'`
+    if ! echo $HW_ADDR_EMAC0 | grep -q ':'
+    then
+        HW_ADDR_EMAC0=$(echo "$HW_ADDR_EMAC0" | sed 's/../&:/g;s/:$//')
+    fi
+    echo "$EMAC0 MAC: $HW_ADDR_EMAC0"
+
+    HW_ADDR_EMAC1=`echo $($SUDO ipmi-fru --fru-file=$FRU_FILE --interpret-oem-data | grep FRU.OEM.MAC.ID.1:) | awk -F'1: ' '{print $2}'`
+    if ! echo $HW_ADDR_EMAC1 | grep -q ':'
+    then
+        HW_ADDR_EMAC1=$(echo "$HW_ADDR_EMAC1" | sed 's/../&:/g;s/:$//')
+    fi
+    echo "$EMAC1 MAC: $HW_ADDR_EMAC1"
+else
+    echo "Unsupported board code '${board_code:-<empty>}' (expected KR or KD)" >&2
+    return 1 2>/dev/null || exit 1
 fi
-echo "$EMAC1 MAC: $HW_ADDR_EMAC1"
 
 EP_MAC=$(echo $HW_ADDR_EMAC1 | tr -d ':')
 MAC_ADD=$(( 0x$EP_MAC + 1 ))

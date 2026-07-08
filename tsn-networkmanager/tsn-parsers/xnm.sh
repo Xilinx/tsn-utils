@@ -70,20 +70,79 @@ if [ ! -d $parserdir ]; then
         exit
 fi
 
+# Start (or restart) the TFTP server and report its status. Works both on a
+# systemd host (managed unit) and in a non-systemd environment such as an OCI
+# container, where in.tftpd-hpa is launched standalone in the foreground.
+# systemd presence is detected via /run/systemd/system (the canonical
+# sd_booted() check), not "command -v systemctl", because the systemctl binary
+# can exist without a running systemd.
+have_systemd() { [ -d /run/systemd/system ]; }
+
+tftpd_running() {
+        if have_systemd; then
+                [ "$($SUDO systemctl is-active tftpd-hpa 2>/dev/null)" = "active" ]
+        else
+                pgrep -x in.tftpd-hpa >/dev/null 2>&1
+        fi
+}
+
+start_tftpd() {
+        if have_systemd; then
+                $SUDO systemctl restart tftpd-hpa
+        else
+                # Non-systemd (container): run the daemon directly. Read the
+                # same /etc/default/tftpd-hpa vars the systemd unit would use,
+                # falling back to the parser defaults. -L keeps it in the
+                # foreground (no inetd), so background it with &.
+                tftpd_running && return 0
+                # shellcheck disable=SC1090
+                [ -f "$tftpd_conf" ] && . "$tftpd_conf"
+                $SUDO in.tftpd-hpa -L ${TFTP_OPTIONS:-$tftp_options} \
+                        -s "${TFTP_DIRECTORY:-$datadir}" &
+                sleep 1
+        fi
+}
+
 if [ ! -d $datadir ]; then
-        $SUDO mkdir $datadir
-        $SUDO chown tftp:tftp $datadir
-        $SUDO sed -i '/TFTP_DIRECTORY/d' "$tftpd_conf" && $SUDO sh -c "echo 'TFTP_DIRECTORY=\"$datadir\"' >> $tftpd_conf"
-        $SUDO sed -i '/TFTP_OPTIONS/d' "$tftpd_conf" && $SUDO sh -c "echo 'TFTP_OPTIONS=\"$tftp_options\"' >> $tftpd_conf"
-        $SUDO systemctl restart tftpd-hpa
+        $SUDO mkdir -p $datadir
+        # in.tftpd-hpa drops privileges to its -u user before servicing a
+        # write, so the data dir must be writable by that user or --create
+        # uploads fail with "TFTP: Illegal operation". Distros that ship a
+        # dedicated "tftp" user (and -u tftp) use it; otherwise the daemon
+        # default is "nobody". Pick whichever exists so this works on both.
+        # chown the OWNER only (no group): the nobody user's primary group is
+        # "nogroup" (gid 65534), not "nobody", so "chown nobody:nobody" fails
+        # with "invalid group", leaves the dir root:root, and the upload still
+        # fails. Owning the dir (0755) is enough for the daemon to write.
+        if id tftp >/dev/null 2>&1; then
+                tftpd_user="tftp"
+        else
+                tftpd_user="nobody"
+        fi
+        if ! $SUDO chown "$tftpd_user" "$datadir" 2>/dev/null; then
+                echo "Warning: unable to chown $datadir to $tftpd_user; falling back to 1777 permissions" >&2
+                $SUDO chmod 1777 "$datadir"
+        fi
 fi
 
+# Keep /etc/default/tftpd-hpa in sync with the parser's data dir / options so
+# both the systemd unit and the standalone launch use the same settings.
+if [ -f "$tftpd_conf" ]; then
+        $SUDO sed -i '/TFTP_DIRECTORY/d' "$tftpd_conf"
+        $SUDO sh -c "echo 'TFTP_DIRECTORY=\"$datadir\"' >> $tftpd_conf"
+        $SUDO sed -i '/TFTP_OPTIONS/d' "$tftpd_conf"
+        $SUDO sh -c "echo 'TFTP_OPTIONS=\"$tftp_options\"' >> $tftpd_conf"
+fi
+
+start_tftpd
+
 # Check TFTP Server Status
-status=$($SUDO systemctl status tftpd-hpa | grep -o "running")
-echo "TFTP Server status:" $status
-if [ "$status" != "running" ]; then
-       echo "TFTP server is not running"
-       exit
+if tftpd_running; then
+        echo "TFTP Server status: running"
+else
+        echo "TFTP Server status: not running"
+        echo "TFTP server is not running"
+        exit 1
 fi
 
 # Obtain TSN MAC interface

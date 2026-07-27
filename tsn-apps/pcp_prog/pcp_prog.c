@@ -20,12 +20,32 @@ struct pmap_data {
 	int st_pcp_reg;
 	int res_pcp_reg;
 };
-char *st_pcp_fname = "/sys/module/xilinx_tsn_ep/parameters/st_pcp";
-char *res_pcp_fname = "/sys/module/xilinx_tsn_ep/parameters/res_pcp";
+/* Resolved at runtime by resolve_param(): the TSN module name differs by
+ * kernel (xilinx_tsn_ep pre xilinx-v2025.1, xilinx_emac_tsn from v2025.1). */
+char *st_pcp_fname;
+char *res_pcp_fname;
 char *config_fname = "/etc/xilinx-tsn/pcp.cfg";
 int set_pcp(int argc, char *argv[]);
 int get_pcp();
 void usage();
+
+/* Return the sysfs path for a driver parameter, auto-detecting the TSN module
+ * name across kernel versions. Returns a malloc'd string, or NULL if the
+ * parameter is not present under any known module name. */
+char *resolve_param(const char *param)
+{
+	const char *mods[] = { "xilinx_emac_tsn", "xilinx_tsn_ep", NULL };
+	char path[128];
+	int i;
+
+	for (i = 0; mods[i]; i++) {
+		snprintf(path, sizeof(path),
+			 "/sys/module/%s/parameters/%s", mods[i], param);
+		if (access(path, F_OK) == 0)
+			return strdup(path);
+	}
+	return NULL;
+}
 int set_pcp(int argc, char *argv[]){
 	
 	int pcp;
@@ -160,22 +180,36 @@ void usage(){
 
 int main(int argc, char *argv[])
 {
-        int ret = 0;
+	int ret = EXIT_FAILURE;
 
-	if (argc < 2){
-		printf("Insufficient arguments\n");
+	if (argc < 2) {
 		usage();
+		goto out;
 	}
 
-        if ((!strcmp(argv[1], "-s")) || (!strcmp(argv[1], "--set"))) {
-                ret = set_pcp(argc, argv);
-        } else if ((!strcmp(argv[1], "-g")) || (!strcmp(argv[1], "--get"))) {
-                ret = get_pcp();
-        } else if ((!strcmp(argv[1], "-h")) || (!strcmp(argv[1], "--help"))) {
-                usage();
-        } else {
-		printf("Invalid arguments: %s\n", argv[1]);
-		usage();
+	st_pcp_fname = resolve_param("st_pcp");
+	res_pcp_fname = resolve_param("res_pcp");
+	if (!st_pcp_fname || !res_pcp_fname) {
+		fprintf(stderr,
+			"TSN driver st_pcp/res_pcp parameters not found under "
+			"/sys/module/{xilinx_emac_tsn,xilinx_tsn_ep}/parameters; "
+			"is the TSN driver loaded?\n");
+		goto out;
 	}
-        return ret;
+
+	if ((!strcmp(argv[1], "-s")) || (!strcmp(argv[1], "--set"))) {
+		ret = set_pcp(argc, argv);
+	} else if ((!strcmp(argv[1], "-g")) || (!strcmp(argv[1], "--get"))) {
+		ret = get_pcp();
+	} else {
+		usage();
+		goto out;
+	}
+
+	ret = (ret == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+
+out:
+	free(st_pcp_fname);
+	free(res_pcp_fname);
+	return ret;
 }
